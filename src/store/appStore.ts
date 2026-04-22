@@ -1,5 +1,4 @@
-import { createStore, action } from 'satcheljs';
-import type { ActionCreator } from 'satcheljs';
+import { makeAutoObservable } from 'mobx';
 
 export type Difficulty = 'easy' | 'medium' | 'hard';
 
@@ -12,39 +11,100 @@ export interface Question {
   emoji: string;
 }
 
-export interface AppState {
-  selectedGrade: number | null;
-  selectedSubject: string | null;
-  difficulty: Difficulty;
-  currentQuestion: Question | null;
-  wrongAnswers: number[];
-  score: number;
-  questionCount: number;
-  showSuccess: boolean;
-  streak: number;
+class AppStore {
+  selectedGrade: number | null = null;
+  selectedSubject: string | null = null;
+  difficulty: Difficulty = 'easy';
+  currentQuestion: Question | null = null;
+  wrongAnswers: number[] = [];
+  score: number = 0;
+  questionCount: number = 0;
+  showSuccess: boolean = false;
+  streak: number = 0;
+
+  constructor() {
+    makeAutoObservable(this);
+  }
+
+  setGrade(grade: number) {
+    this.selectedGrade = grade;
+    this.selectedSubject = null;
+    this.currentQuestion = null;
+    this.wrongAnswers = [];
+    this.showSuccess = false;
+    this.score = 0;
+    this.questionCount = 0;
+    this.streak = 0;
+  }
+
+  setSubject(subject: string) {
+    this.selectedSubject = subject;
+    this.currentQuestion = null;
+    this.wrongAnswers = [];
+    this.showSuccess = false;
+    this.score = 0;
+    this.questionCount = 0;
+    this.streak = 0;
+  }
+
+  setDifficulty(difficulty: Difficulty) {
+    this.difficulty = difficulty;
+  }
+
+  setQuestion(question: Question) {
+    this.currentQuestion = question;
+    this.wrongAnswers = [];
+    this.showSuccess = false;
+  }
+
+  markWrongAnswer(answer: number) {
+    if (!this.wrongAnswers.includes(answer)) {
+      this.wrongAnswers.push(answer);
+    }
+    this.streak = 0;
+  }
+
+  markCorrect() {
+    this.score += 1;
+    this.questionCount += 1;
+    this.showSuccess = true;
+    this.streak += 1;
+  }
+
+  nextQuestion(question: Question) {
+    this.currentQuestion = question;
+    this.wrongAnswers = [];
+    this.showSuccess = false;
+  }
+
+  skipQuestion(question: Question) {
+    this.questionCount += 1;
+    this.currentQuestion = question;
+    this.wrongAnswers = [];
+    this.showSuccess = false;
+    this.streak = 0;
+  }
+
+  resetSubject() {
+    this.selectedSubject = null;
+    this.currentQuestion = null;
+    this.wrongAnswers = [];
+    this.showSuccess = false;
+    this.score = 0;
+    this.questionCount = 0;
+    this.streak = 0;
+  }
+
+  resetGrade() {
+    this.selectedGrade = null;
+    this.selectedSubject = null;
+    this.currentQuestion = null;
+    this.wrongAnswers = [];
+    this.showSuccess = false;
+    this.score = 0;
+    this.questionCount = 0;
+    this.streak = 0;
+  }
 }
 
-const initialState: AppState = {
-  selectedGrade: null,
-  selectedSubject: null,
-  difficulty: 'easy',
-  currentQuestion: null,
-  wrongAnswers: [],
-  score: 0,
-  questionCount: 0,
-  showSuccess: false,
-  streak: 0,
-};
-
-export const getStore = createStore<AppState>('appStore', initialState);
-
-export const setGrade: ActionCreator<{ grade: number }> = action('setGrade');
-export const setSubject: ActionCreator<{ subject: string }> = action('setSubject');
-export const setDifficulty: ActionCreator<{ difficulty: Difficulty }> = action('setDifficulty');
-export const setQuestion: ActionCreator<{ question: Question }> = action('setQuestion');
-export const markWrongAnswer: ActionCreator<{ answer: number }> = action('markWrongAnswer');
-export const markCorrect: ActionCreator<Record<string, never>> = action('markCorrect');
-export const nextQuestion: ActionCreator<{ question: Question }> = action('nextQuestion');
-export const skipQuestion: ActionCreator<{ question: Question }> = action('skipQuestion');
-export const resetSubject: ActionCreator<Record<string, never>> = action('resetSubject');
-export const resetGrade: ActionCreator<Record<string, never>> = action('resetGrade');
+export const appStore = new AppStore();

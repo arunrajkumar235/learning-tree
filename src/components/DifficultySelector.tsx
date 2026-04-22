@@ -1,5 +1,5 @@
-import { observer } from 'mobx-react-lite';
-import { getStore, setDifficulty } from '../store/appStore';
+import { observer } from 'mobx-react';
+import { appStore } from '../store/appStore';
 import type { Difficulty } from '../store/appStore';
 
 const levels: { id: Difficulty; label: string; emoji: string; desc: string; color: string; active: string }[] = [
@@ -9,20 +9,17 @@ const levels: { id: Difficulty; label: string; emoji: string; desc: string; colo
 ];
 
 const DifficultySelector = observer(() => {
-  const { difficulty } = getStore();
-
   return (
     <div className="flex items-center gap-2 flex-wrap justify-end">
       <span className="text-sm font-semibold text-gray-500 mr-1">Level:</span>
-      {levels.map(({ id, label, emoji, desc, color, active }) => (
+      {levels.map(({ id, label, emoji, color, active }) => (
         <button
           key={id}
-          onClick={() => setDifficulty({ difficulty: id })}
-          title={desc}
+          onClick={() => appStore.setDifficulty(id)}
           className={`
             flex items-center gap-1 px-3 py-1.5 rounded-full border-2 font-bold text-sm
             transition-all duration-150 cursor-pointer hover:scale-105 active:scale-95
-            ${difficulty === id ? active : color}
+            ${appStore.difficulty === id ? active : color}
           `}
         >
           <span>{emoji}</span>

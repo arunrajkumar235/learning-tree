@@ -1,6 +1,6 @@
-import { observer } from 'mobx-react-lite';
+import { observer } from 'mobx-react';
 import { useEffect, useRef } from 'react';
-import { getStore, markCorrect, markWrongAnswer, nextQuestion, skipQuestion, resetSubject } from '../store/appStore';
+import { appStore } from '../store/appStore';
 import { generateQuestion } from '../utils/questionGenerator';
 import DifficultySelector from './DifficultySelector';
 
@@ -19,8 +19,7 @@ const OP_BG: Record<string, string> = {
 };
 
 const QuestionCard = observer(() => {
-  const store = getStore();
-  const { currentQuestion, wrongAnswers, showSuccess, score, questionCount, difficulty, selectedGrade, streak } = store;
+  const { currentQuestion, wrongAnswers, showSuccess, score, questionCount, difficulty, selectedGrade, streak } = appStore;
   const successTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
@@ -28,7 +27,7 @@ const QuestionCard = observer(() => {
       if (successTimerRef.current) clearTimeout(successTimerRef.current);
       successTimerRef.current = setTimeout(() => {
         const newQ = generateQuestion(difficulty, selectedGrade!);
-        nextQuestion({ question: newQ });
+        appStore.nextQuestion(newQ);
       }, 2200);
     }
     return () => {
@@ -45,15 +44,15 @@ const QuestionCard = observer(() => {
   const handleAnswer = (option: number) => {
     if (showSuccess || wrongAnswers.includes(option)) return;
     if (option === answer) {
-      markCorrect();
+      appStore.markCorrect();
     } else {
-      markWrongAnswer({ answer: option });
+      appStore.markWrongAnswer(option);
     }
   };
 
   const handleSkip = () => {
     const newQ = generateQuestion(difficulty, selectedGrade!);
-    skipQuestion({ question: newQ });
+    appStore.skipQuestion(newQ);
   };
 
   const accuracy = questionCount > 0 ? Math.round((score / questionCount) * 100) : null;
@@ -63,7 +62,7 @@ const QuestionCard = observer(() => {
       {/* Top bar */}
       <div className="flex items-center justify-between w-full gap-4 flex-wrap">
         <button
-          onClick={() => resetSubject()}
+          onClick={() => appStore.resetSubject()}
           className="flex items-center gap-1 text-gray-500 hover:text-gray-700 text-sm font-medium transition-colors"
         >
           ← Back
@@ -110,14 +109,12 @@ const QuestionCard = observer(() => {
         </div>
 
         <div className="px-8 py-10 flex flex-col items-center gap-8">
-          {/* Question text */}
           <div className="text-center">
             <p className="text-6xl font-extrabold text-gray-800 tracking-wide">
               {question}
             </p>
           </div>
 
-          {/* Options grid */}
           <div className="grid grid-cols-2 gap-4 w-full max-w-md">
             {options.map((option, idx) => {
               const isWrong = wrongAnswers.includes(option);
@@ -152,7 +149,6 @@ const QuestionCard = observer(() => {
             })}
           </div>
 
-          {/* Skip button */}
           <button
             onClick={handleSkip}
             disabled={showSuccess}

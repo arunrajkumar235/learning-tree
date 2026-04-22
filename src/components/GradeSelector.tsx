@@ -1,5 +1,5 @@
-import { observer } from 'mobx-react-lite';
-import { setGrade } from '../store/appStore';
+import { observer } from 'mobx-react';
+import { appStore } from '../store/appStore';
 
 const grades = [
   { grade: 3, emoji: '🌱', label: 'Grade 3', color: 'from-green-400 to-emerald-500', shadow: 'shadow-green-200' },
@@ -18,7 +18,7 @@ const GradeSelector = observer(() => {
         {grades.map(({ grade, emoji, label, color, shadow }) => (
           <button
             key={grade}
-            onClick={() => setGrade({ grade })}
+            onClick={() => appStore.setGrade(grade)}
             className={`
               flex flex-col items-center justify-center gap-3 p-8 rounded-3xl
               bg-gradient-to-br ${color} text-white font-bold text-xl
