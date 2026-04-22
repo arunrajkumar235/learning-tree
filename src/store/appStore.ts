@@ -13,7 +13,7 @@ export interface Question {
 
 export const QUIZ_QUESTION_LIMIT = 10;
 export const MAX_SCORE = QUIZ_QUESTION_LIMIT * 10;
-export const HINT_POINTS: Record<number, number> = { 0: 10, 1: 7, 2: 2 };
+export const MISTAKE_POINTS: Record<number, number> = { 0: 10, 1: 7, 2: 2 };
 
 class AppStore {
   selectedGrade: number | null = null;
@@ -104,8 +104,8 @@ class AppStore {
 
   markCorrect() {
     this.totalTimeSpent += Date.now() - this.questionStartTime;
-    const hints = this.autoEliminatedOptions.length;
-    this.score += HINT_POINTS[hints] ?? 0;
+    const totalMistakes = this.wrongAnswers.length + this.autoEliminatedOptions.length;
+    this.score += MISTAKE_POINTS[totalMistakes] ?? 0;
     this.correctCount += 1;
     this.questionCount += 1;
     this.showSuccess = true;

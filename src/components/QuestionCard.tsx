@@ -1,6 +1,6 @@
 import { observer } from 'mobx-react';
 import { useEffect, useRef, useState } from 'react';
-import { appStore, QUIZ_QUESTION_LIMIT, HINT_POINTS } from '../store/appStore';import { generateQuestion } from '../utils/questionGenerator';
+import { appStore, QUIZ_QUESTION_LIMIT, MISTAKE_POINTS } from '../store/appStore';import { generateQuestion } from '../utils/questionGenerator';
 import DifficultySelector from './DifficultySelector';
 
 const OP_COLORS: Record<string, string> = {
@@ -145,7 +145,7 @@ const QuestionCard = observer(() => {
               {answer} is right! Great job! 🌟
             </div>
             <div className="text-2xl font-extrabold text-yellow-500">
-              +{HINT_POINTS[autoEliminatedOptions.length] ?? 0} pts
+              +{MISTAKE_POINTS[wrongAnswers.length + autoEliminatedOptions.length] ?? 0} pts
             </div>
           </div>
         </div>

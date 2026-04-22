@@ -1,5 +1,5 @@
 import { observer } from 'mobx-react';
-import { appStore, QUIZ_QUESTION_LIMIT, MAX_SCORE, HINT_POINTS } from '../store/appStore';
+import { appStore, QUIZ_QUESTION_LIMIT, MAX_SCORE, MISTAKE_POINTS } from '../store/appStore';
 import { generateQuestion } from '../utils/questionGenerator';
 
 function formatTime(ms: number): string {
@@ -62,18 +62,23 @@ const QuizComplete = observer(() => {
         {/* Scoring legend */}
         <div className="flex justify-around text-center mb-4 bg-gray-50 dark:bg-gray-700/50 rounded-xl p-3">
           <div>
-            <div className="text-lg font-extrabold text-gray-700 dark:text-gray-200">{HINT_POINTS[0]} pts</div>
-            <div className="text-xs text-gray-500 dark:text-gray-400">No hints</div>
+            <div className="text-lg font-extrabold text-gray-700 dark:text-gray-200">{MISTAKE_POINTS[0]} pts</div>
+            <div className="text-xs text-gray-500 dark:text-gray-400">No mistakes</div>
           </div>
           <div className="border-l border-gray-200 dark:border-gray-600" />
           <div>
-            <div className="text-lg font-extrabold text-gray-700 dark:text-gray-200">{HINT_POINTS[1]} pts</div>
-            <div className="text-xs text-gray-500 dark:text-gray-400">1 hint used</div>
+            <div className="text-lg font-extrabold text-gray-700 dark:text-gray-200">{MISTAKE_POINTS[1]} pts</div>
+            <div className="text-xs text-gray-500 dark:text-gray-400">1 mistake</div>
           </div>
           <div className="border-l border-gray-200 dark:border-gray-600" />
           <div>
-            <div className="text-lg font-extrabold text-gray-700 dark:text-gray-200">{HINT_POINTS[2]} pts</div>
-            <div className="text-xs text-gray-500 dark:text-gray-400">2 hints used</div>
+            <div className="text-lg font-extrabold text-gray-700 dark:text-gray-200">{MISTAKE_POINTS[2]} pts</div>
+            <div className="text-xs text-gray-500 dark:text-gray-400">2 mistakes</div>
+          </div>
+          <div className="border-l border-gray-200 dark:border-gray-600" />
+          <div>
+            <div className="text-lg font-extrabold text-gray-700 dark:text-gray-200">0 pts</div>
+            <div className="text-xs text-gray-500 dark:text-gray-400">3+ mistakes</div>
           </div>
         </div>
 
