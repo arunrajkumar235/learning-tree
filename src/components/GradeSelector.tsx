@@ -2,17 +2,17 @@ import { observer } from 'mobx-react';
 import { appStore } from '../store/appStore';
 
 const grades = [
-  { grade: 3, emoji: '🌱', label: 'Grade 3', color: 'from-green-400 to-emerald-500', shadow: 'shadow-green-200' },
-  { grade: 4, emoji: '🌿', label: 'Grade 4', color: 'from-blue-400 to-cyan-500', shadow: 'shadow-blue-200' },
-  { grade: 5, emoji: '🌳', label: 'Grade 5', color: 'from-purple-400 to-violet-500', shadow: 'shadow-purple-200' },
+  { grade: 3, emoji: '🌱', label: 'Grade 3', color: 'from-green-400 to-emerald-500', shadow: 'shadow-green-200 dark:shadow-green-900' },
+  { grade: 4, emoji: '🌿', label: 'Grade 4', color: 'from-blue-400 to-cyan-500', shadow: 'shadow-blue-200 dark:shadow-blue-900' },
+  { grade: 5, emoji: '🌳', label: 'Grade 5', color: 'from-purple-400 to-violet-500', shadow: 'shadow-purple-200 dark:shadow-purple-900' },
 ];
 
 const GradeSelector = observer(() => {
   return (
     <div className="flex flex-col items-center gap-8 w-full max-w-2xl">
       <div className="text-center">
-        <h2 className="text-3xl font-bold text-gray-700 mb-2">Which grade are you in? 🎒</h2>
-        <p className="text-gray-500 text-lg">Pick your grade to get started!</p>
+        <h2 className="text-3xl font-bold text-gray-700 dark:text-gray-200 mb-2">Which grade are you in? 🎒</h2>
+        <p className="text-gray-500 dark:text-gray-400 text-lg">Pick your grade to get started!</p>
       </div>
       <div className="flex flex-col sm:flex-row gap-6 w-full justify-center">
         {grades.map(({ grade, emoji, label, color, shadow }) => (

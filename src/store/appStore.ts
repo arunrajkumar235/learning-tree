@@ -21,9 +21,17 @@ class AppStore {
   questionCount: number = 0;
   showSuccess: boolean = false;
   streak: number = 0;
+  isDarkMode: boolean = localStorage.getItem('darkMode') === 'true';
 
   constructor() {
     makeAutoObservable(this);
+    if (this.isDarkMode) document.documentElement.classList.add('dark');
+  }
+
+  toggleDarkMode() {
+    this.isDarkMode = !this.isDarkMode;
+    localStorage.setItem('darkMode', String(this.isDarkMode));
+    document.documentElement.classList.toggle('dark', this.isDarkMode);
   }
 
   setGrade(grade: number) {
