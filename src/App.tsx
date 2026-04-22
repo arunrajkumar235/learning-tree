@@ -4,17 +4,20 @@ import { appStore } from './store/appStore';
 import GradeSelector from './components/GradeSelector';
 import SubjectSelector from './components/SubjectSelector';
 import QuestionCard from './components/QuestionCard';
+import QuizComplete from './components/QuizComplete';
 import { generateQuestion } from './utils/questionGenerator';
 
 const App = observer(() => {
-  const { selectedGrade, selectedSubject, currentQuestion, difficulty, isDarkMode } = appStore;
+  const { selectedGrade, selectedSubject, currentQuestion, difficulty, isDarkMode, quizComplete, showSuccess } = appStore;
 
   useEffect(() => {
-    if (selectedSubject && selectedGrade && !currentQuestion) {
+    if (selectedSubject && selectedGrade && !currentQuestion && !quizComplete) {
       const q = generateQuestion(difficulty, selectedGrade);
       appStore.setQuestion(q);
     }
   }, [selectedSubject, selectedGrade]);
+
+  const showResults = quizComplete && !showSuccess;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-100 via-purple-50 to-pink-100 dark:from-gray-950 dark:via-indigo-950 dark:to-purple-950 flex flex-col transition-colors duration-300">
@@ -48,7 +51,8 @@ const App = observer(() => {
       <main className="flex-1 flex items-center justify-center px-4 py-8">
         {!selectedGrade && <GradeSelector />}
         {selectedGrade && !selectedSubject && <SubjectSelector />}
-        {selectedGrade && selectedSubject && currentQuestion && <QuestionCard />}
+        {selectedGrade && selectedSubject && showResults && <QuizComplete />}
+        {selectedGrade && selectedSubject && currentQuestion && !showResults && <QuestionCard />}
       </main>
 
       <footer className="text-center py-3 text-xs text-gray-400 dark:text-gray-600 font-medium">
