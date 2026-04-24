@@ -4,16 +4,21 @@ import { appStore } from './store/appStore';
 import SubjectSelector from './components/SubjectSelector';
 import LessonSelector from './components/LessonSelector';
 import QuestionCard from './components/QuestionCard';
+import SpellingCard from './components/SpellingCard';
 import QuizComplete from './components/QuizComplete';
 import { generateQuestion } from './utils/questionGenerator';
+import { generateSpellingQuestion } from './utils/wordList';
 
 const App = observer(() => {
-  const { selectedSubject, selectedLesson, currentQuestion, difficulty, isDarkMode, quizComplete, showSuccess, gameKey } = appStore;
+  const { selectedSubject, selectedLesson, currentQuestion, currentSpellingWord, difficulty, isDarkMode, quizComplete, showSuccess, gameKey } = appStore;
 
   useEffect(() => {
-    if (selectedSubject && selectedLesson && !currentQuestion && !quizComplete) {
-      const q = generateQuestion(difficulty);
-      appStore.setQuestion(q);
+    if (selectedSubject && selectedLesson && !quizComplete) {
+      if (selectedLesson === 'arithmetic' && !currentQuestion) {
+        appStore.setQuestion(generateQuestion(difficulty));
+      } else if (selectedLesson === 'spellings' && !currentSpellingWord) {
+        appStore.setSpellingWord(generateSpellingQuestion(difficulty));
+      }
     }
   }, [selectedSubject, selectedLesson, difficulty, gameKey]);
 
@@ -44,11 +49,12 @@ const App = observer(() => {
         {!selectedSubject && <SubjectSelector />}
         {selectedSubject && !selectedLesson && <LessonSelector />}
         {selectedSubject && selectedLesson && showResults && <QuizComplete />}
-        {selectedSubject && selectedLesson && currentQuestion && !showResults && <QuestionCard />}
+        {selectedSubject && selectedLesson === 'arithmetic' && currentQuestion && !showResults && <QuestionCard />}
+        {selectedSubject && selectedLesson === 'spellings' && currentSpellingWord && !showResults && <SpellingCard />}
       </main>
 
       <footer className="text-center py-3 text-xs text-gray-400 dark:text-gray-600 font-medium">
-        Learning Tree — Making math fun! 🎈
+        Learning Tree — Learning is fun! 🎈
       </footer>
     </div>
   );

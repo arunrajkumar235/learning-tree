@@ -10,6 +10,14 @@ const subjects = [
     color: 'from-orange-400 to-yellow-500',
     shadow: 'shadow-orange-200 dark:shadow-orange-900',
   },
+  {
+    id: 'english',
+    label: 'English',
+    emoji: '📝',
+    description: 'Words, spelling & more!',
+    color: 'from-sky-400 to-blue-500',
+    shadow: 'shadow-sky-200 dark:shadow-sky-900',
+  },
 ];
 
 const SubjectSelector = observer(() => {

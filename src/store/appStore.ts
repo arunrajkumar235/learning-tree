@@ -2,6 +2,14 @@ import { makeAutoObservable } from 'mobx';
 
 export type Difficulty = 'easy' | 'medium' | 'hard';
 
+export interface SpellingQuestion {
+  id: string;
+  word: string;
+  missingIndices: number[];
+  missingLetters: string[];
+  letterBoard: string[];
+}
+
 export interface Question {
   id: string;
   question: string;
@@ -30,6 +38,7 @@ class AppStore {
   selectedLesson: string | null = null;
   difficulty: Difficulty = 'easy';
   currentQuestion: Question | null = null;
+  currentSpellingWord: SpellingQuestion | null = null;
   wrongAnswers: number[] = [];
   autoEliminatedOptions: number[] = [];
   score: number = 0;
@@ -142,6 +151,48 @@ class AppStore {
     this.gameKey += 1;
   }
 
+  setSpellingWord(word: SpellingQuestion) {
+    this.currentSpellingWord = word;
+    this.lastBonusPoints = 0;
+    this.questionStartTime = Date.now();
+  }
+
+  nextSpellingWord(word: SpellingQuestion) {
+    this.currentSpellingWord = word;
+    this.lastBonusPoints = 0;
+    this.currentQuestionNumber += 1;
+    this.questionStartTime = Date.now();
+  }
+
+  skipSpellingWord(word: SpellingQuestion) {
+    this.totalTimeSpent += Date.now() - this.questionStartTime;
+    this.questionCount += 1;
+    this.currentSpellingWord = word;
+    this.lastBonusPoints = 0;
+    this.currentQuestionNumber += 1;
+    this.streak = 0;
+    this.questionStartTime = Date.now();
+    if (this.questionCount >= QUIZ_QUESTION_LIMIT) {
+      this.quizComplete = true;
+    }
+  }
+
+  markWordComplete(wrongCount: number) {
+    const elapsedSeconds = (Date.now() - this.questionStartTime) / 1000;
+    this.totalTimeSpent += Date.now() - this.questionStartTime;
+    const basePoints = MISTAKE_POINTS[wrongCount] ?? 0;
+    const bonus = calcSpeedBonus(elapsedSeconds);
+    this.lastBonusPoints = bonus;
+    this.score += basePoints + bonus;
+    this.correctCount += 1;
+    this.questionCount += 1;
+    this.showSuccess = true;
+    this.streak += 1;
+    if (this.questionCount >= QUIZ_QUESTION_LIMIT) {
+      this.quizComplete = true;
+    }
+  }
+
   resetLesson() {
     this.selectedLesson = null;
     this._resetGameState();
@@ -155,6 +206,7 @@ class AppStore {
 
   private _resetGameState() {
     this.currentQuestion = null;
+    this.currentSpellingWord = null;
     this.wrongAnswers = [];
     this.autoEliminatedOptions = [];
     this.showSuccess = false;
