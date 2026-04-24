@@ -137,8 +137,8 @@ class AppStore {
   }
 
   restartQuiz(question: Question) {
-    this.currentQuestion = question;
     this._resetGameState();
+    this.currentQuestion = question;
   }
 
   resetLesson() {
