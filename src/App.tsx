@@ -4,18 +4,22 @@ import { appStore } from './store/appStore';
 import SubjectSelector from './components/SubjectSelector';
 import LessonSelector from './components/LessonSelector';
 import QuestionCard from './components/QuestionCard';
+import InverseArithmeticCard from './components/InverseArithmeticCard';
 import SpellingCard from './components/SpellingCard';
 import QuizComplete from './components/QuizComplete';
 import { generateQuestion } from './utils/questionGenerator';
+import { generateInverseQuestion } from './utils/inverseQuestionGenerator';
 import { generateSpellingQuestion } from './utils/wordList';
 
 const App = observer(() => {
-  const { selectedSubject, selectedLesson, currentQuestion, currentSpellingWord, difficulty, isDarkMode, quizComplete, showSuccess, gameKey } = appStore;
+  const { selectedSubject, selectedLesson, currentQuestion, currentSpellingWord, currentInverseQuestion, difficulty, isDarkMode, quizComplete, showSuccess, gameKey } = appStore;
 
   useEffect(() => {
     if (selectedSubject && selectedLesson && !quizComplete) {
       if (selectedLesson === 'arithmetic' && !currentQuestion) {
         appStore.setQuestion(generateQuestion(difficulty));
+      } else if (selectedLesson === 'inverse-arithmetic' && !currentInverseQuestion) {
+        appStore.setInverseQuestion(generateInverseQuestion(difficulty));
       } else if (selectedLesson === 'spellings' && !currentSpellingWord) {
         appStore.setSpellingWord(generateSpellingQuestion(difficulty));
       }
@@ -50,6 +54,7 @@ const App = observer(() => {
         {selectedSubject && !selectedLesson && <LessonSelector />}
         {selectedSubject && selectedLesson && showResults && <QuizComplete />}
         {selectedSubject && selectedLesson === 'arithmetic' && currentQuestion && !showResults && <QuestionCard />}
+        {selectedSubject && selectedLesson === 'inverse-arithmetic' && currentInverseQuestion && !showResults && <InverseArithmeticCard />}
         {selectedSubject && selectedLesson === 'spellings' && currentSpellingWord && !showResults && <SpellingCard />}
       </main>
 

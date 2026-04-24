@@ -19,6 +19,14 @@ export interface Question {
   emoji: string;
 }
 
+export interface InverseQuestion {
+  id: string;
+  question: number;
+  answer: string;
+  options: string[];
+  emoji: string;
+}
+
 export const QUIZ_QUESTION_LIMIT = 10;
 // Base max is 100 (10 pts × 10 questions); bonus can push score over 100
 export const MAX_SCORE = QUIZ_QUESTION_LIMIT * 10;
@@ -39,8 +47,11 @@ class AppStore {
   difficulty: Difficulty = 'easy';
   currentQuestion: Question | null = null;
   currentSpellingWord: SpellingQuestion | null = null;
+  currentInverseQuestion: InverseQuestion | null = null;
   wrongAnswers: number[] = [];
   autoEliminatedOptions: number[] = [];
+  wrongAnswerStrings: string[] = [];
+  autoEliminatedStrings: string[] = [];
   score: number = 0;
   correctCount: number = 0;
   questionCount: number = 0;
@@ -146,8 +157,72 @@ class AppStore {
     }
   }
 
-  restartQuiz() {
-    this._resetGameState();
+  setInverseQuestion(question: InverseQuestion) {
+    this.currentInverseQuestion = question;
+    this.wrongAnswerStrings = [];
+    this.autoEliminatedStrings = [];
+    this.showSuccess = false;
+    this.lastBonusPoints = 0;
+    this.questionStartTime = Date.now();
+  }
+
+  markWrongAnswerString(answer: string) {
+    if (!this.wrongAnswerStrings.includes(answer)) {
+      this.wrongAnswerStrings.push(answer);
+    }
+    this.streak = 0;
+  }
+
+  autoEliminateStringOption(option: string) {
+    if (!this.autoEliminatedStrings.includes(option) && !this.wrongAnswerStrings.includes(option)) {
+      this.autoEliminatedStrings.push(option);
+    }
+  }
+
+  markInverseCorrect() {
+    const elapsedSeconds = (Date.now() - this.questionStartTime) / 1000;
+    this.totalTimeSpent += Date.now() - this.questionStartTime;
+    const totalMistakes = this.wrongAnswerStrings.length + this.autoEliminatedStrings.length;
+    const basePoints = MISTAKE_POINTS[totalMistakes] ?? 0;
+    const bonus = calcSpeedBonus(elapsedSeconds);
+    this.lastBonusPoints = bonus;
+    this.score += basePoints + bonus;
+    this.correctCount += 1;
+    this.questionCount += 1;
+    this.showSuccess = true;
+    this.streak += 1;
+    if (this.questionCount >= QUIZ_QUESTION_LIMIT) {
+      this.quizComplete = true;
+    }
+  }
+
+  nextInverseQuestion(question: InverseQuestion) {
+    this.currentInverseQuestion = question;
+    this.wrongAnswerStrings = [];
+    this.autoEliminatedStrings = [];
+    this.showSuccess = false;
+    this.lastBonusPoints = 0;
+    this.currentQuestionNumber += 1;
+    this.questionStartTime = Date.now();
+  }
+
+  skipInverseQuestion(question: InverseQuestion) {
+    this.totalTimeSpent += Date.now() - this.questionStartTime;
+    this.questionCount += 1;
+    this.currentInverseQuestion = question;
+    this.wrongAnswerStrings = [];
+    this.autoEliminatedStrings = [];
+    this.showSuccess = false;
+    this.streak = 0;
+    this.lastBonusPoints = 0;
+    this.currentQuestionNumber += 1;
+    this.questionStartTime = Date.now();
+    if (this.questionCount >= QUIZ_QUESTION_LIMIT) {
+      this.quizComplete = true;
+    }
+  }
+
+  restartQuiz() {    this._resetGameState();
     this.gameKey += 1;
   }
 
@@ -209,8 +284,11 @@ class AppStore {
   private _resetGameState() {
     this.currentQuestion = null;
     this.currentSpellingWord = null;
+    this.currentInverseQuestion = null;
     this.wrongAnswers = [];
     this.autoEliminatedOptions = [];
+    this.wrongAnswerStrings = [];
+    this.autoEliminatedStrings = [];
     this.showSuccess = false;
     this.score = 0;
     this.correctCount = 0;
