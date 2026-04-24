@@ -159,6 +159,7 @@ class AppStore {
 
   nextSpellingWord(word: SpellingQuestion) {
     this.currentSpellingWord = word;
+    this.showSuccess = false;
     this.lastBonusPoints = 0;
     this.currentQuestionNumber += 1;
     this.questionStartTime = Date.now();
@@ -168,6 +169,7 @@ class AppStore {
     this.totalTimeSpent += Date.now() - this.questionStartTime;
     this.questionCount += 1;
     this.currentSpellingWord = word;
+    this.showSuccess = false;
     this.lastBonusPoints = 0;
     this.currentQuestionNumber += 1;
     this.streak = 0;

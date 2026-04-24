@@ -183,7 +183,7 @@ const SpellingCard = observer(() => {
       )}
 
       {/* Spelling card */}
-      <div className="w-full rounded-3xl shadow-2xl overflow-hidden border-4 border-white dark:border-gray-700 bg-sky-50 dark:bg-sky-950/60">
+      <div className="w-full rounded-3xl shadow-2xl overflow-hidden border-4 border-white dark:border-gray-600 bg-sky-50 dark:bg-gray-800">
         <div className="bg-gradient-to-r from-sky-500 to-blue-500 px-8 py-5 flex items-center gap-3">
           <span className="text-4xl">🔤</span>
           <span className="text-white font-bold text-xl opacity-90">Spellings</span>
@@ -205,18 +205,17 @@ const SpellingCard = observer(() => {
                 <div
                   key={i}
                   className={`
-                    w-12 h-14 sm:w-14 sm:h-16 rounded-xl flex items-center justify-center
-                    text-2xl sm:text-3xl font-extrabold border-3 transition-all duration-200
+                    w-12 h-12 sm:w-14 sm:h-14 rounded-lg flex items-center justify-center
+                    text-2xl sm:text-3xl font-extrabold border-2 transition-all duration-200
                     ${isShown
-                      ? 'bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-600 text-gray-700 dark:text-gray-200 shadow-md'
+                      ? 'bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-500 text-gray-700 dark:text-gray-100 shadow-md'
                       : isFilled
-                      ? 'bg-green-100 dark:bg-green-900/50 border-green-400 dark:border-green-500 text-green-700 dark:text-green-300 shadow-md'
+                      ? 'bg-green-100 dark:bg-green-800 border-green-400 dark:border-green-500 text-green-700 dark:text-green-100 shadow-md'
                       : isCurrent
-                      ? 'bg-indigo-100 dark:bg-indigo-900/50 border-indigo-400 dark:border-indigo-400 text-indigo-400 shadow-lg animate-pulse border-dashed'
-                      : 'bg-gray-100 dark:bg-gray-800/50 border-gray-300 dark:border-gray-600 text-gray-300 border-dashed'
+                      ? 'bg-indigo-100 dark:bg-indigo-800 border-indigo-400 dark:border-indigo-400 text-indigo-500 dark:text-indigo-200 shadow-lg animate-pulse'
+                      : 'bg-gray-100 dark:bg-gray-700 border-gray-300 dark:border-gray-500 text-gray-300 dark:text-gray-500'
                     }
                   `}
-                  style={{ border: '3px solid' }}
                 >
                   {isCurrent ? '?' : letter}
                 </div>
@@ -242,21 +241,20 @@ const SpellingCard = observer(() => {
                   onClick={() => handleLetterClick(letter, boardIdx)}
                   disabled={showSuccess || isHint || allFilled}
                   className={`
-                    w-12 h-12 sm:w-14 sm:h-14 rounded-2xl
+                    w-12 h-12 sm:w-14 sm:h-14 rounded-xl
                     text-xl sm:text-2xl font-extrabold uppercase
                     transition-all duration-150 shadow-md border-2
                     ${isFlashing
                       ? 'bg-red-400 dark:bg-red-600 border-red-500 dark:border-red-400 text-white scale-90'
                       : isHint
-                      ? 'bg-gray-100 dark:bg-gray-700/50 border-dashed border-gray-300 dark:border-gray-600 text-gray-300 dark:text-gray-600 cursor-not-allowed opacity-40'
+                      ? 'bg-gray-200 dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-400 dark:text-gray-500 cursor-not-allowed opacity-40 line-through'
                       : showSuccess || allFilled
-                      ? 'bg-gray-100 dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-300 cursor-not-allowed opacity-50'
-                      : 'bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-600 text-gray-700 dark:text-gray-200 hover:scale-110 hover:shadow-lg hover:border-sky-400 dark:hover:border-sky-500 active:scale-95 cursor-pointer'
+                      ? 'bg-gray-100 dark:bg-gray-700 border-gray-200 dark:border-gray-600 text-gray-400 dark:text-gray-500 cursor-not-allowed opacity-50'
+                      : 'bg-white dark:bg-gray-600 border-gray-300 dark:border-gray-500 text-gray-700 dark:text-white hover:scale-110 hover:shadow-lg hover:border-sky-400 dark:hover:border-sky-400 active:scale-95 cursor-pointer'
                     }
                   `}
                 >
                   {letter.toUpperCase()}
-                  {isHint && <span className="block text-xs font-bold text-gray-400">hint</span>}
                 </button>
               );
             })}
