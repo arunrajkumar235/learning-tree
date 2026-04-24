@@ -1,21 +1,21 @@
 import { observer } from 'mobx-react';
 import { useEffect } from 'react';
 import { appStore } from './store/appStore';
-import GradeSelector from './components/GradeSelector';
 import SubjectSelector from './components/SubjectSelector';
+import LessonSelector from './components/LessonSelector';
 import QuestionCard from './components/QuestionCard';
 import QuizComplete from './components/QuizComplete';
 import { generateQuestion } from './utils/questionGenerator';
 
 const App = observer(() => {
-  const { selectedGrade, selectedSubject, currentQuestion, difficulty, isDarkMode, quizComplete, showSuccess } = appStore;
+  const { selectedSubject, selectedLesson, currentQuestion, difficulty, isDarkMode, quizComplete, showSuccess } = appStore;
 
   useEffect(() => {
-    if (selectedSubject && selectedGrade && !currentQuestion && !quizComplete) {
-      const q = generateQuestion(difficulty, selectedGrade);
+    if (selectedSubject && selectedLesson && !currentQuestion && !quizComplete) {
+      const q = generateQuestion(difficulty);
       appStore.setQuestion(q);
     }
-  }, [selectedSubject, selectedGrade]);
+  }, [selectedSubject, selectedLesson, difficulty]);
 
   const showResults = quizComplete && !showSuccess;
 
@@ -29,30 +29,22 @@ const App = observer(() => {
             Learning Tree
           </span>
         </div>
-        <div className="flex items-center gap-3">
-          {selectedGrade && (
-            <div className="flex items-center gap-2 bg-white dark:bg-gray-800 rounded-full px-4 py-1.5 shadow-sm border border-gray-100 dark:border-gray-700">
-              <span className="text-sm font-semibold text-gray-500 dark:text-gray-400">Grade</span>
-              <span className="text-sm font-extrabold text-indigo-600 dark:text-indigo-400">{selectedGrade}</span>
-            </div>
-          )}
-          {/* Dark mode toggle */}
-          <button
-            onClick={() => appStore.toggleDarkMode()}
-            className="w-10 h-10 flex items-center justify-center rounded-full bg-white dark:bg-gray-800 shadow-sm border border-gray-100 dark:border-gray-700 hover:scale-110 active:scale-95 transition-all duration-200 cursor-pointer"
-            title={isDarkMode ? 'Switch to light mode' : 'Switch to dark mode'}
-          >
-            <span className="text-xl">{isDarkMode ? '☀️' : '🌙'}</span>
-          </button>
-        </div>
+        {/* Dark mode toggle */}
+        <button
+          onClick={() => appStore.toggleDarkMode()}
+          className="w-10 h-10 flex items-center justify-center rounded-full bg-white dark:bg-gray-800 shadow-sm border border-gray-100 dark:border-gray-700 hover:scale-110 active:scale-95 transition-all duration-200 cursor-pointer"
+          title={isDarkMode ? 'Switch to light mode' : 'Switch to dark mode'}
+        >
+          <span className="text-xl">{isDarkMode ? '☀️' : '🌙'}</span>
+        </button>
       </header>
 
       {/* Main content */}
       <main className="flex-1 flex items-center justify-center px-4 py-8">
-        {!selectedGrade && <GradeSelector />}
-        {selectedGrade && !selectedSubject && <SubjectSelector />}
-        {selectedGrade && selectedSubject && showResults && <QuizComplete />}
-        {selectedGrade && selectedSubject && currentQuestion && !showResults && <QuestionCard />}
+        {!selectedSubject && <SubjectSelector />}
+        {selectedSubject && !selectedLesson && <LessonSelector />}
+        {selectedSubject && selectedLesson && showResults && <QuizComplete />}
+        {selectedSubject && selectedLesson && currentQuestion && !showResults && <QuestionCard />}
       </main>
 
       <footer className="text-center py-3 text-xs text-gray-400 dark:text-gray-600 font-medium">

@@ -9,20 +9,21 @@ const OPERATION_EMOJIS: Record<OpType, string> = {
   division: '➗',
 };
 
+// Medium: tables 1–6, 10, 11. Hard: tables 4–12.
+const MEDIUM_TABLES = [1, 2, 3, 4, 5, 6, 10, 11];
+const HARD_TABLES = [4, 5, 6, 7, 8, 9, 10, 11, 12];
+
 function rand(min: number, max: number): number {
   return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
-function getRanges(difficulty: Difficulty, grade: number): { min: number; max: number } {
-  if (difficulty === 'easy') return { min: 1, max: grade === 3 ? 10 : grade === 4 ? 15 : 20 };
-  if (difficulty === 'medium') return { min: 1, max: grade === 3 ? 20 : grade === 4 ? 30 : 50 };
-  return { min: 1, max: grade === 3 ? 50 : grade === 4 ? 75 : 100 };
+function pickFrom(arr: number[]): number {
+  return arr[Math.floor(Math.random() * arr.length)];
 }
 
-function getAvailableOps(difficulty: Difficulty, grade: number): OpType[] {
+function getAvailableOps(difficulty: Difficulty): OpType[] {
   if (difficulty === 'easy') return ['addition', 'subtraction'];
-  if (difficulty === 'medium') return ['addition', 'subtraction', 'multiplication'];
-  return ['addition', 'subtraction', 'multiplication', ...(grade >= 4 ? ['division' as OpType] : [])];
+  return ['addition', 'subtraction', 'multiplication', 'division'];
 }
 
 function generateWrongOptions(correct: number, count: number): number[] {
@@ -37,7 +38,6 @@ function generateWrongOptions(correct: number, count: number): number[] {
       wrongs.add(candidate);
     }
   }
-  // Fill remaining if needed
   let fallback = correct + 1;
   while (wrongs.size < count) {
     if (fallback !== correct) wrongs.add(fallback);
@@ -55,44 +55,50 @@ function shuffle<T>(arr: T[]): T[] {
   return a;
 }
 
-export function generateQuestion(difficulty: Difficulty, grade: number): Question {
-  const { min, max } = getRanges(difficulty, grade);
-  const ops = getAvailableOps(difficulty, grade);
+export function generateQuestion(difficulty: Difficulty): Question {
+  const ops = getAvailableOps(difficulty);
   const opType = ops[rand(0, ops.length - 1)];
 
   let a: number, b: number, answer: number, questionStr: string;
 
   switch (opType) {
-    case 'addition':
+    case 'addition': {
+      const min = difficulty === 'easy' ? 1 : difficulty === 'medium' ? 20 : 50;
+      const max = difficulty === 'easy' ? 20 : difficulty === 'medium' ? 50 : 100;
       a = rand(min, max);
       b = rand(min, max);
       answer = a + b;
       questionStr = `${a} + ${b} = ?`;
       break;
-    case 'subtraction':
+    }
+    case 'subtraction': {
+      const min = difficulty === 'easy' ? 1 : difficulty === 'medium' ? 20 : 50;
+      const max = difficulty === 'easy' ? 20 : difficulty === 'medium' ? 50 : 100;
       a = rand(min, max);
-      b = rand(1, a);
+      b = rand(min, a); // b ≤ a ensures non-negative result
       answer = a - b;
       questionStr = `${a} - ${b} = ?`;
       break;
+    }
     case 'multiplication': {
-      const mulMax = difficulty === 'easy' ? 5 : difficulty === 'medium' ? 10 : 12;
-      a = rand(1, mulMax);
-      b = rand(1, mulMax);
+      const tables = difficulty === 'medium' ? MEDIUM_TABLES : HARD_TABLES;
+      a = pickFrom(tables);
+      b = pickFrom(tables);
       answer = a * b;
       questionStr = `${a} × ${b} = ?`;
       break;
     }
     case 'division': {
-      b = rand(2, difficulty === 'medium' ? 10 : 12);
-      answer = rand(1, difficulty === 'medium' ? 10 : 12);
-      a = b * answer;
+      const tables = difficulty === 'medium' ? MEDIUM_TABLES : HARD_TABLES;
+      b = pickFrom(tables);     // divisor
+      answer = pickFrom(tables); // quotient
+      a = b * answer;            // dividend
       questionStr = `${a} ÷ ${b} = ?`;
       break;
     }
     default:
-      a = rand(min, max);
-      b = rand(min, max);
+      a = rand(1, 20);
+      b = rand(1, 20);
       answer = a + b;
       questionStr = `${a} + ${b} = ?`;
   }

@@ -11,25 +11,28 @@ function formatTime(ms: number): string {
 }
 
 function getStars(score: number): string {
-  if (score >= 90) return '⭐⭐⭐';
-  if (score >= 70) return '⭐⭐';
-  if (score >= 50) return '⭐';
+  const pct = score / MAX_SCORE;
+  if (pct >= 0.9) return '⭐⭐⭐';
+  if (pct >= 0.7) return '⭐⭐';
+  if (pct >= 0.5) return '⭐';
   return '💪';
 }
 
 function getFeedback(score: number): string {
-  if (score >= 90) return "Outstanding! You're a math superstar! 🏆";
-  if (score >= 70) return 'Great job! Keep it up! 🎉';
-  if (score >= 50) return 'Good effort! Practice makes perfect! 💪';
+  const pct = score / MAX_SCORE;
+  if (pct >= 0.9) return "Outstanding! You're a math superstar! 🏆";
+  if (pct >= 0.7) return 'Great job! Keep it up! 🎉';
+  if (pct >= 0.5) return 'Good effort! Practice makes perfect! 💪';
   return "Keep trying! You'll get better! 🌱";
 }
 
 const QuizComplete = observer(() => {
-  const { score, correctCount, totalTimeSpent, difficulty, selectedGrade } = appStore;
+  const { score, correctCount, totalTimeSpent, difficulty, questionCount } = appStore;
   const accuracy = Math.round((correctCount / QUIZ_QUESTION_LIMIT) * 100);
+  const avgTimeMs = questionCount > 0 ? Math.floor(totalTimeSpent / questionCount) : 0;
 
   const handlePlayAgain = () => {
-    const q = generateQuestion(difficulty, selectedGrade!);
+    const q = generateQuestion(difficulty);
     appStore.restartQuiz(q);
   };
 
@@ -50,7 +53,7 @@ const QuizComplete = observer(() => {
           <p className="text-lg font-bold text-gray-600 dark:text-gray-300 mt-3">{getFeedback(score)}</p>
         </div>
 
-        {/* Total score — prominent */}
+        {/* Total score */}
         <div className="bg-gradient-to-r from-indigo-500 to-purple-600 rounded-2xl p-5 text-center mb-4">
           <div className="text-6xl font-extrabold text-white">
             {score}
@@ -60,25 +63,23 @@ const QuizComplete = observer(() => {
         </div>
 
         {/* Scoring legend */}
-        <div className="flex justify-around text-center mb-4 bg-gray-50 dark:bg-gray-700/50 rounded-xl p-3">
-          <div>
-            <div className="text-lg font-extrabold text-gray-700 dark:text-gray-200">{MISTAKE_POINTS[0]} pts</div>
-            <div className="text-xs text-gray-500 dark:text-gray-400">No mistakes</div>
-          </div>
-          <div className="border-l border-gray-200 dark:border-gray-600" />
-          <div>
-            <div className="text-lg font-extrabold text-gray-700 dark:text-gray-200">{MISTAKE_POINTS[1]} pts</div>
-            <div className="text-xs text-gray-500 dark:text-gray-400">1 mistake</div>
-          </div>
-          <div className="border-l border-gray-200 dark:border-gray-600" />
-          <div>
-            <div className="text-lg font-extrabold text-gray-700 dark:text-gray-200">{MISTAKE_POINTS[2]} pts</div>
-            <div className="text-xs text-gray-500 dark:text-gray-400">2 mistakes</div>
-          </div>
-          <div className="border-l border-gray-200 dark:border-gray-600" />
-          <div>
-            <div className="text-lg font-extrabold text-gray-700 dark:text-gray-200">0 pts</div>
-            <div className="text-xs text-gray-500 dark:text-gray-400">3+ mistakes</div>
+        <div className="mb-4 bg-gray-50 dark:bg-gray-700/50 rounded-xl p-3">
+          <p className="text-xs font-extrabold text-gray-400 dark:text-gray-500 uppercase tracking-wider text-center mb-2">How points work</p>
+          <div className="flex justify-around text-center">
+            <div>
+              <div className="text-sm font-extrabold text-gray-700 dark:text-gray-200">{MISTAKE_POINTS[0]} base</div>
+              <div className="text-xs text-gray-500 dark:text-gray-400">No mistakes</div>
+            </div>
+            <div className="border-l border-gray-200 dark:border-gray-600" />
+            <div>
+              <div className="text-sm font-extrabold text-gray-700 dark:text-gray-200">{MISTAKE_POINTS[1]} base</div>
+              <div className="text-xs text-gray-500 dark:text-gray-400">1 mistake</div>
+            </div>
+            <div className="border-l border-gray-200 dark:border-gray-600" />
+            <div>
+              <div className="text-sm font-extrabold text-emerald-600 dark:text-emerald-400">+1–5 ⚡</div>
+              <div className="text-xs text-gray-500 dark:text-gray-400">Speed bonus</div>
+            </div>
           </div>
         </div>
 
@@ -97,10 +98,10 @@ const QuizComplete = observer(() => {
 
           <div className="bg-orange-50 dark:bg-orange-950/50 rounded-2xl p-4 text-center col-span-2">
             <div className="text-4xl font-extrabold text-orange-500 dark:text-orange-400">
-              ⏱️ {formatTime(totalTimeSpent)}
+              ⏱️ {formatTime(avgTimeMs)}
             </div>
             <div className="text-sm font-semibold text-gray-500 dark:text-gray-400 mt-1">
-              Total time for all {QUIZ_QUESTION_LIMIT} questions
+              Avg. time per question
             </div>
           </div>
         </div>
@@ -115,10 +116,10 @@ const QuizComplete = observer(() => {
           🔄 Play Again
         </button>
         <button
-          onClick={() => appStore.resetSubject()}
+          onClick={() => appStore.resetLesson()}
           className="flex-1 bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-600 text-gray-700 dark:text-gray-200 font-extrabold text-xl py-4 rounded-2xl shadow hover:shadow-md transition-all duration-200 hover:scale-105 active:scale-95 cursor-pointer"
         >
-          📚 Change Subject
+          🎯 Change Level
         </button>
       </div>
     </div>

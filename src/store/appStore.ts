@@ -12,12 +12,22 @@ export interface Question {
 }
 
 export const QUIZ_QUESTION_LIMIT = 10;
-export const MAX_SCORE = QUIZ_QUESTION_LIMIT * 10;
+// Max per question: 10 base (no mistakes) + 5 speed bonus = 15
+export const MAX_SCORE = QUIZ_QUESTION_LIMIT * 15;
 export const MISTAKE_POINTS: Record<number, number> = { 0: 10, 1: 7, 2: 2 };
 
+function calcSpeedBonus(elapsedSeconds: number): number {
+  if (elapsedSeconds <= 1) return 5;
+  if (elapsedSeconds <= 2) return 4;
+  if (elapsedSeconds <= 3) return 3;
+  if (elapsedSeconds <= 4) return 2;
+  if (elapsedSeconds <= 5) return 1;
+  return 0;
+}
+
 class AppStore {
-  selectedGrade: number | null = null;
   selectedSubject: string | null = null;
+  selectedLesson: string | null = null;
   difficulty: Difficulty = 'easy';
   currentQuestion: Question | null = null;
   wrongAnswers: number[] = [];
@@ -32,6 +42,7 @@ class AppStore {
   questionStartTime: number = Date.now();
   totalTimeSpent: number = 0;
   quizComplete: boolean = false;
+  lastBonusPoints: number = 0;
 
   constructor() {
     makeAutoObservable(this);
@@ -44,41 +55,16 @@ class AppStore {
     document.documentElement.classList.toggle('dark', this.isDarkMode);
   }
 
-  setGrade(grade: number) {
-    this.selectedGrade = grade;
-    this.selectedSubject = null;
-    this.currentQuestion = null;
-    this.wrongAnswers = [];
-    this.autoEliminatedOptions = [];
-    this.showSuccess = false;
-    this.score = 0;
-    this.correctCount = 0;
-    this.questionCount = 0;
-    this.currentQuestionNumber = 1;
-    this.streak = 0;
-    this.totalTimeSpent = 0;
-    this.quizComplete = false;
-    this.questionStartTime = Date.now();
-  }
-
   setSubject(subject: string) {
     this.selectedSubject = subject;
-    this.currentQuestion = null;
-    this.wrongAnswers = [];
-    this.autoEliminatedOptions = [];
-    this.showSuccess = false;
-    this.score = 0;
-    this.correctCount = 0;
-    this.questionCount = 0;
-    this.currentQuestionNumber = 1;
-    this.streak = 0;
-    this.totalTimeSpent = 0;
-    this.quizComplete = false;
-    this.questionStartTime = Date.now();
+    this.selectedLesson = null;
+    this._resetGameState();
   }
 
-  setDifficulty(difficulty: Difficulty) {
+  setLesson(lesson: string, difficulty: Difficulty) {
+    this.selectedLesson = lesson;
     this.difficulty = difficulty;
+    this._resetGameState();
   }
 
   setQuestion(question: Question) {
@@ -86,6 +72,7 @@ class AppStore {
     this.wrongAnswers = [];
     this.autoEliminatedOptions = [];
     this.showSuccess = false;
+    this.lastBonusPoints = 0;
     this.questionStartTime = Date.now();
   }
 
@@ -103,9 +90,13 @@ class AppStore {
   }
 
   markCorrect() {
+    const elapsedSeconds = (Date.now() - this.questionStartTime) / 1000;
     this.totalTimeSpent += Date.now() - this.questionStartTime;
     const totalMistakes = this.wrongAnswers.length + this.autoEliminatedOptions.length;
-    this.score += MISTAKE_POINTS[totalMistakes] ?? 0;
+    const basePoints = MISTAKE_POINTS[totalMistakes] ?? 0;
+    const bonus = calcSpeedBonus(elapsedSeconds);
+    this.lastBonusPoints = bonus;
+    this.score += basePoints + bonus;
     this.correctCount += 1;
     this.questionCount += 1;
     this.showSuccess = true;
@@ -124,6 +115,7 @@ class AppStore {
     this.wrongAnswers = [];
     this.autoEliminatedOptions = [];
     this.showSuccess = false;
+    this.lastBonusPoints = 0;
     this.currentQuestionNumber += 1;
     this.questionStartTime = Date.now();
   }
@@ -136,6 +128,7 @@ class AppStore {
     this.autoEliminatedOptions = [];
     this.showSuccess = false;
     this.streak = 0;
+    this.lastBonusPoints = 0;
     this.currentQuestionNumber += 1;
     this.questionStartTime = Date.now();
     if (this.questionCount >= QUIZ_QUESTION_LIMIT) {
@@ -145,38 +138,21 @@ class AppStore {
 
   restartQuiz(question: Question) {
     this.currentQuestion = question;
-    this.wrongAnswers = [];
-    this.autoEliminatedOptions = [];
-    this.showSuccess = false;
-    this.score = 0;
-    this.correctCount = 0;
-    this.questionCount = 0;
-    this.currentQuestionNumber = 1;
-    this.streak = 0;
-    this.totalTimeSpent = 0;
-    this.quizComplete = false;
-    this.questionStartTime = Date.now();
+    this._resetGameState();
+  }
+
+  resetLesson() {
+    this.selectedLesson = null;
+    this._resetGameState();
   }
 
   resetSubject() {
     this.selectedSubject = null;
-    this.currentQuestion = null;
-    this.wrongAnswers = [];
-    this.autoEliminatedOptions = [];
-    this.showSuccess = false;
-    this.score = 0;
-    this.correctCount = 0;
-    this.questionCount = 0;
-    this.currentQuestionNumber = 1;
-    this.streak = 0;
-    this.totalTimeSpent = 0;
-    this.quizComplete = false;
-    this.questionStartTime = Date.now();
+    this.selectedLesson = null;
+    this._resetGameState();
   }
 
-  resetGrade() {
-    this.selectedGrade = null;
-    this.selectedSubject = null;
+  private _resetGameState() {
     this.currentQuestion = null;
     this.wrongAnswers = [];
     this.autoEliminatedOptions = [];
@@ -188,6 +164,7 @@ class AppStore {
     this.streak = 0;
     this.totalTimeSpent = 0;
     this.quizComplete = false;
+    this.lastBonusPoints = 0;
     this.questionStartTime = Date.now();
   }
 }

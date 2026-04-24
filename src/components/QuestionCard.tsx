@@ -1,7 +1,7 @@
 import { observer } from 'mobx-react';
 import { useEffect, useRef, useState } from 'react';
-import { appStore, QUIZ_QUESTION_LIMIT, MISTAKE_POINTS } from '../store/appStore';import { generateQuestion } from '../utils/questionGenerator';
-import DifficultySelector from './DifficultySelector';
+import { appStore, QUIZ_QUESTION_LIMIT, MISTAKE_POINTS } from '../store/appStore';
+import { generateQuestion } from '../utils/questionGenerator';
 
 const OP_COLORS: Record<string, string> = {
   addition:       'from-blue-500 to-cyan-500',
@@ -18,11 +18,11 @@ const OP_BG: Record<string, string> = {
 };
 
 const QuestionCard = observer(() => {
-  const { currentQuestion, wrongAnswers, autoEliminatedOptions, showSuccess, score, currentQuestionNumber, difficulty, selectedGrade, streak, quizComplete, correctCount } = appStore;
+  const { currentQuestion, wrongAnswers, autoEliminatedOptions, showSuccess, score, currentQuestionNumber, difficulty, streak, quizComplete, correctCount, lastBonusPoints } = appStore;
   const successTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [elapsed, setElapsed] = useState(0);
 
-  // Per-question display timer (1s tick, frozen while success overlay is shown)
+  // Per-question timer (resets each new question, pauses while success overlay shows)
   useEffect(() => {
     setElapsed(0);
     if (showSuccess) return;
@@ -58,7 +58,7 @@ const QuestionCard = observer(() => {
         if (appStore.quizComplete) {
           appStore.clearSuccess();
         } else {
-          const newQ = generateQuestion(difficulty, selectedGrade!);
+          const newQ = generateQuestion(difficulty);
           appStore.nextQuestion(newQ);
         }
       }, 2200);
@@ -81,19 +81,17 @@ const QuestionCard = observer(() => {
   };
 
   const handleSkip = () => {
-    if (appStore.questionCount >= QUIZ_QUESTION_LIMIT - 1) {
-      appStore.skipQuestion(generateQuestion(difficulty, selectedGrade!));
-    } else {
-      appStore.skipQuestion(generateQuestion(difficulty, selectedGrade!));
-    }
+    appStore.skipQuestion(generateQuestion(difficulty));
   };
+
+  const basePoints = MISTAKE_POINTS[wrongAnswers.length + autoEliminatedOptions.length] ?? 0;
 
   return (
     <div className="flex flex-col items-center gap-6 w-full max-w-2xl">
       {/* Top bar */}
       <div className="flex items-center justify-between w-full gap-4 flex-wrap">
         <button
-          onClick={() => appStore.resetSubject()}
+          onClick={() => appStore.resetLesson()}
           className="flex items-center gap-1 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 text-sm font-medium transition-colors"
         >
           ← Back
@@ -112,7 +110,6 @@ const QuestionCard = observer(() => {
             )}
           </div>
         </div>
-        <DifficultySelector />
       </div>
 
       {/* Progress bar */}
@@ -136,7 +133,7 @@ const QuestionCard = observer(() => {
       {/* Success overlay */}
       {showSuccess && (
         <div className="fixed inset-0 flex flex-col items-center justify-center z-50 pointer-events-none">
-          <div className="bg-white/90 dark:bg-gray-900/90 backdrop-blur-sm rounded-3xl shadow-2xl p-10 flex flex-col items-center gap-4 border-4 border-green-400 dark:border-green-500 animate-bounce">
+          <div className="bg-white/90 dark:bg-gray-900/90 backdrop-blur-sm rounded-3xl shadow-2xl p-10 flex flex-col items-center gap-3 border-4 border-green-400 dark:border-green-500 animate-bounce">
             <div className="text-9xl">✅</div>
             <div className="text-4xl font-extrabold text-green-600 dark:text-green-400">
               {streak >= 5 ? '🏆 Amazing!!' : streak >= 3 ? '🔥 On Fire!' : '🎉 Correct!'}
@@ -144,8 +141,13 @@ const QuestionCard = observer(() => {
             <div className="text-xl text-gray-600 dark:text-gray-300 font-semibold">
               {answer} is right! Great job! 🌟
             </div>
-            <div className="text-2xl font-extrabold text-yellow-500">
-              +{MISTAKE_POINTS[wrongAnswers.length + autoEliminatedOptions.length] ?? 0} pts
+            <div className="flex items-center gap-3 mt-1">
+              <span className="text-2xl font-extrabold text-yellow-500">+{basePoints} pts</span>
+              {lastBonusPoints > 0 && (
+                <span className="text-xl font-extrabold text-emerald-500 bg-emerald-50 dark:bg-emerald-900/40 px-3 py-1 rounded-full border border-emerald-300 dark:border-emerald-700">
+                  ⚡ +{lastBonusPoints} speed bonus!
+                </span>
+              )}
             </div>
           </div>
         </div>
