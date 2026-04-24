@@ -8,14 +8,14 @@ import QuizComplete from './components/QuizComplete';
 import { generateQuestion } from './utils/questionGenerator';
 
 const App = observer(() => {
-  const { selectedSubject, selectedLesson, currentQuestion, difficulty, isDarkMode, quizComplete, showSuccess } = appStore;
+  const { selectedSubject, selectedLesson, currentQuestion, difficulty, isDarkMode, quizComplete, showSuccess, gameKey } = appStore;
 
   useEffect(() => {
     if (selectedSubject && selectedLesson && !currentQuestion && !quizComplete) {
       const q = generateQuestion(difficulty);
       appStore.setQuestion(q);
     }
-  }, [selectedSubject, selectedLesson, difficulty]);
+  }, [selectedSubject, selectedLesson, difficulty, gameKey]);
 
   const showResults = quizComplete && !showSuccess;
 

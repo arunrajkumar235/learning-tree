@@ -1,6 +1,5 @@
 import { observer } from 'mobx-react';
 import { appStore, QUIZ_QUESTION_LIMIT, MAX_SCORE, MISTAKE_POINTS } from '../store/appStore';
-import { generateQuestion } from '../utils/questionGenerator';
 
 function formatTime(ms: number): string {
   const totalSeconds = Math.floor(ms / 1000);
@@ -11,29 +10,28 @@ function formatTime(ms: number): string {
 }
 
 function getStars(score: number): string {
-  const pct = score / MAX_SCORE;
-  if (pct >= 0.9) return '⭐⭐⭐';
-  if (pct >= 0.7) return '⭐⭐';
-  if (pct >= 0.5) return '⭐';
+  if (score > MAX_SCORE) return '🌟💫🌟';
+  if (score >= MAX_SCORE) return '⭐⭐⭐';
+  if (score >= MAX_SCORE * 0.7) return '⭐⭐';
+  if (score >= MAX_SCORE * 0.5) return '⭐';
   return '💪';
 }
 
 function getFeedback(score: number): string {
-  const pct = score / MAX_SCORE;
-  if (pct >= 0.9) return "Outstanding! You're a math superstar! 🏆";
-  if (pct >= 0.7) return 'Great job! Keep it up! 🎉';
-  if (pct >= 0.5) return 'Good effort! Practice makes perfect! 💪';
+  if (score > MAX_SCORE) return "LEGENDARY! Speed master! 🚀✨";
+  if (score >= MAX_SCORE) return "Perfect score! You're a math superstar! 🏆";
+  if (score >= MAX_SCORE * 0.7) return 'Great job! Keep it up! 🎉';
+  if (score >= MAX_SCORE * 0.5) return 'Good effort! Practice makes perfect! 💪';
   return "Keep trying! You'll get better! 🌱";
 }
 
 const QuizComplete = observer(() => {
-  const { score, correctCount, totalTimeSpent, difficulty, questionCount } = appStore;
+  const { score, correctCount, totalTimeSpent, questionCount } = appStore;
   const accuracy = Math.round((correctCount / QUIZ_QUESTION_LIMIT) * 100);
   const avgTimeMs = questionCount > 0 ? Math.floor(totalTimeSpent / questionCount) : 0;
 
   const handlePlayAgain = () => {
-    const q = generateQuestion(difficulty);
-    appStore.restartQuiz(q);
+    appStore.restartQuiz();
   };
 
   return (
@@ -55,11 +53,13 @@ const QuizComplete = observer(() => {
 
         {/* Total score */}
         <div className="bg-gradient-to-r from-indigo-500 to-purple-600 rounded-2xl p-5 text-center mb-4">
-          <div className="text-6xl font-extrabold text-white">
+          <div className={`text-6xl font-extrabold ${score > MAX_SCORE ? 'text-yellow-300' : 'text-white'}`}>
             {score}
             <span className="text-3xl font-bold text-indigo-200"> / {MAX_SCORE}</span>
           </div>
-          <div className="text-indigo-100 font-semibold mt-1">Total Points</div>
+          <div className="text-indigo-100 font-semibold mt-1">
+            {score > MAX_SCORE ? '🚀 Speed bonus pushed you over 100!' : 'Total Points'}
+          </div>
         </div>
 
         {/* Scoring legend */}

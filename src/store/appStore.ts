@@ -12,8 +12,8 @@ export interface Question {
 }
 
 export const QUIZ_QUESTION_LIMIT = 10;
-// Max per question: 10 base (no mistakes) + 5 speed bonus = 15
-export const MAX_SCORE = QUIZ_QUESTION_LIMIT * 15;
+// Base max is 100 (10 pts × 10 questions); bonus can push score over 100
+export const MAX_SCORE = QUIZ_QUESTION_LIMIT * 10;
 export const MISTAKE_POINTS: Record<number, number> = { 0: 10, 1: 7, 2: 2 };
 
 function calcSpeedBonus(elapsedSeconds: number): number {
@@ -43,6 +43,7 @@ class AppStore {
   totalTimeSpent: number = 0;
   quizComplete: boolean = false;
   lastBonusPoints: number = 0;
+  gameKey: number = 0;
 
   constructor() {
     makeAutoObservable(this);
@@ -136,9 +137,9 @@ class AppStore {
     }
   }
 
-  restartQuiz(question: Question) {
+  restartQuiz() {
     this._resetGameState();
-    this.currentQuestion = question;
+    this.gameKey += 1;
   }
 
   resetLesson() {
