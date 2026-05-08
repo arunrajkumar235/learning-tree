@@ -101,7 +101,7 @@ function generateMissingTerm(difficulty: Difficulty): { question: string; answer
   const c = b * k; // c is a multiple of b so answer is integer
   const x = a * k;
   return {
-    question: `Find x :   ${a} : ${b}  =  x : ${c}`,
+    question: `${a} : ${b}  =  ? : ${c}`,
     answer: x,
   };
 }
