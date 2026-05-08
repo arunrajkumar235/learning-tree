@@ -46,18 +46,19 @@ const RatioProportionCard = observer(() => {
   const [elapsed, setElapsed] = useState(0);
 
   // Per-question timer (resets each new question, pauses while success overlay shows)
+  // Timer is hidden on hard difficulty — no interval needed
   useEffect(() => {
     setElapsed(0);
-    if (showSuccess) return;
+    if (showSuccess || difficulty === 'hard') return;
     const interval = setInterval(() => {
       setElapsed(Math.floor((Date.now() - appStore.questionStartTime) / 1000));
     }, 1000);
     return () => clearInterval(interval);
-  }, [currentQuestion?.id, showSuccess]);
+  }, [currentQuestion?.id, showSuccess, difficulty]);
 
-  // Auto-eliminate a wrong option every 15 seconds
+  // Auto-eliminate a wrong option every 15 seconds (disabled on hard difficulty)
   useEffect(() => {
-    if (showSuccess || quizComplete) return;
+    if (showSuccess || quizComplete || difficulty === 'hard') return;
     const interval = setInterval(() => {
       if (appStore.showSuccess || appStore.quizComplete || !appStore.currentQuestion) return;
       const { options, answer } = appStore.currentQuestion;
@@ -73,7 +74,7 @@ const RatioProportionCard = observer(() => {
       }
     }, 15000);
     return () => clearInterval(interval);
-  }, [currentQuestion?.id, showSuccess, quizComplete]);
+  }, [currentQuestion?.id, showSuccess, quizComplete, difficulty]);
 
   // Auto-advance after correct answer
   useEffect(() => {
@@ -149,15 +150,17 @@ const RatioProportionCard = observer(() => {
           <span className="text-sm font-bold text-gray-500 dark:text-gray-400">
             Question {currentQuestionNumber} / {QUIZ_QUESTION_LIMIT}
           </span>
-          <span
-            className={`text-sm font-bold tabular-nums flex items-center gap-1 ${
-              timerWarning
-                ? 'text-red-500 dark:text-red-400 animate-pulse'
-                : 'text-purple-600 dark:text-purple-400'
-            }`}
-          >
-            ⏱️ {elapsed}s
-          </span>
+          {difficulty !== 'hard' && (
+            <span
+              className={`text-sm font-bold tabular-nums flex items-center gap-1 ${
+                timerWarning
+                  ? 'text-red-500 dark:text-red-400 animate-pulse'
+                  : 'text-purple-600 dark:text-purple-400'
+              }`}
+            >
+              ⏱️ {elapsed}s
+            </span>
+          )}
         </div>
         <div className="w-full h-3 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
           <div
