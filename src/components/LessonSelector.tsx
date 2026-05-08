@@ -73,7 +73,7 @@ const ALGEBRA_LEVELS: LessonDifficulty[] = [
     emoji: '🌟',
     color: 'from-green-400 to-emerald-500',
     shadow: 'shadow-green-200 dark:shadow-green-900',
-    details: ['x + a = b, ax = b', 'Numbers 1–15', 'One-step equations'],
+    details: ['ax + b = c, x/a − b = c', 'Two-step equations', 'Numbers up to 30'],
   },
   {
     id: 'medium',
@@ -81,7 +81,7 @@ const ALGEBRA_LEVELS: LessonDifficulty[] = [
     emoji: '⚡',
     color: 'from-yellow-400 to-orange-500',
     shadow: 'shadow-yellow-200 dark:shadow-yellow-900',
-    details: ['ax + b = c', 'Numbers up to 50', 'Two-step equations'],
+    details: ['Variables on both sides', 'Distributive & fractions', 'Numbers up to 60'],
   },
   {
     id: 'hard',

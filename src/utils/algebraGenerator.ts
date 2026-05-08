@@ -89,42 +89,53 @@ function generateEasyOneStep(): { question: string; answer: number } {
 }
 
 // ---------------------------------------------------------------------------
-// Medium: one-step (larger numbers) + two-step, x in 5–25
+// Medium: harder than easy — variables on both sides, distributive, fractional
 // ---------------------------------------------------------------------------
 function generateMediumEquation(): { question: string; answer: number; type: AlgebraOpType } {
   const kind = rand(1, 4);
 
   if (kind === 1) {
-    // x + a = b  (larger numbers)
-    const x = rand(10, 40);
-    const a = rand(8, 30);
-    const b = x + a;
-    return { question: `x + ${a} = ${b}`, answer: x, type: 'algebra-one-step' };
+    // ax + b = cx + d  (variables on both sides)
+    const c = rand(2, 4);
+    const a = c + rand(2, 5);          // a > c → net coefficient positive
+    const x = rand(4, 20);
+    const b = rand(3, 20);
+    const d = (a - c) * x + b;
+    return { question: `${a}x + ${b} = ${c}x + ${d}`, answer: x, type: 'algebra-two-step' };
   } else if (kind === 2) {
-    // ax = b  (larger)
-    const a = rand(3, 12);
-    const x = rand(5, 20);
-    const b = a * x;
-    return { question: `${a}x = ${b}`, answer: x, type: 'algebra-one-step' };
-  } else if (kind === 3) {
-    // ax + b = c  (two-step)
-    const a = rand(2, 5);
+    // a(x + b) = c  (simple distributive)
+    const a = rand(3, 8);
     const x = rand(3, 15);
-    const b = rand(2, 20);
-    const c = a * x + b;
-    return { question: `${a}x + ${b} = ${c}`, answer: x, type: 'algebra-two-step' };
+    const b = rand(2, 10);
+    const c = a * (x + b);
+    return { question: `${a}(x + ${b}) = ${c}`, answer: x, type: 'algebra-two-step' };
+  } else if (kind === 3) {
+    // (ax + b) / c = d  (fractional)
+    // Construct: pick c, d, a, x → b = d*c − a*x  (ensure b > 0)
+    const c = rand(2, 5);
+    const d = rand(4, 15);
+    const a = rand(2, 4);
+    const x = rand(2, 10);
+    const b = d * c - a * x;
+    if (b >= 1) return { question: `(${a}x + ${b}) / ${c} = ${d}`, answer: x, type: 'algebra-two-step' };
+    // try a smaller x
+    const x2 = rand(1, 6);
+    const b2 = d * c - a * x2;
+    if (b2 >= 1) return { question: `(${a}x + ${b2}) / ${c} = ${d}`, answer: x2, type: 'algebra-two-step' };
+    // fallback to distributive
+    const a3 = rand(3, 7); const x3 = rand(3, 12); const b3 = rand(2, 8);
+    return { question: `${a3}(x + ${b3}) = ${a3 * (x3 + b3)}`, answer: x3, type: 'algebra-two-step' };
   } else {
-    // ax − b = c  (two-step)
-    const a = rand(2, 5);
-    const x = rand(4, 18);
-    const b = rand(2, 15);
-    const c = a * x - b;
+    // a(x − b) = c  (distributive with subtraction)
+    const a = rand(3, 8);
+    const x = rand(5, 20);
+    const b = rand(2, 8);
+    const c = a * (x - b);
     if (c <= 0) {
-      // fallback to addition form
-      const a2 = rand(2, 4); const x2 = rand(4, 15); const b2 = rand(2, 12);
-      return { question: `${a2}x + ${b2} = ${a2 * x2 + b2}`, answer: x2, type: 'algebra-two-step' };
+      const a2 = rand(3, 6); const x2 = rand(6, 18); const b2 = rand(2, 6);
+      return { question: `${a2}(x − ${b2}) = ${a2 * (x2 - b2)}`, answer: x2, type: 'algebra-two-step' };
     }
-    return { question: `${a}x − ${b} = ${c}`, answer: x, type: 'algebra-two-step' };
+    return { question: `${a}(x − ${b}) = ${c}`, answer: x, type: 'algebra-two-step' };
   }
 }
 
@@ -330,7 +341,7 @@ export function generateAlgebraQuestion(difficulty: Difficulty): Question {
 
   if (difficulty === 'easy') {
     const gen = generateEasyOneStep();
-    opType   = 'algebra-one-step';
+    opType   = 'algebra-two-step';
     question = gen.question;
     answer   = gen.answer;
   } else if (difficulty === 'medium') {

@@ -16,7 +16,7 @@ const ALGEBRA_BG: Record<string, string> = {
 };
 
 const TYPE_LABELS: Record<string, string> = {
-  'algebra-one-step': 'One-Step Equation',
+  'algebra-one-step': 'Two-Step Equation',
   'algebra-two-step': 'Two-Step Equation',
   'algebra-word':     'Word Problem',
 };
