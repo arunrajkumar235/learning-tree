@@ -152,58 +152,114 @@ function generateFourthProportional(): { question: string; answer: number } {
 }
 
 // ---------------------------------------------------------------------------
-// Hard: Word problems
+// Hard: Word problems — proportion stories + ratio sharing
 // ---------------------------------------------------------------------------
-const WORD_PROBLEM_TEMPLATES = [
-  // Class boys/girls
+
+// Pairs where numbers stay in hard range (up to 200) when scaled
+const PROP_STORY_PAIRS: [number, number][] = [
+  [3, 2], [4, 3], [5, 2], [5, 3], [5, 4],
+  [7, 4], [7, 5], [8, 5], [6, 5], [7, 3],
+];
+
+const PERSON_NAMES: [string, string][] = [
+  ['Roshan', 'Vaibhav'], ['Priya', 'Anita'], ['Rahul', 'Suresh'],
+  ['Kavya', 'Meera'], ['Arjun', 'Dev'], ['Riya', 'Sana'],
+  ['Pooja', 'Nisha'], ['Vikram', 'Anil'],
+];
+
+const WORD_PROBLEM_TEMPLATES: Array<() => { question: string; answer: number }> = [
+  // --- Proportion story: travel time ---
   () => {
-    const pairs  = [[2, 3], [3, 4], [3, 5], [4, 5], [5, 7]];
+    const [p, q] = pickFrom(PROP_STORY_PAIRS);
+    const k = rand(6, 16); const m = rand(8, 24);
+    const [nameA, nameB] = pickFrom(PERSON_NAMES);
+    const destinations = [
+      ['school', 'the park'], ['the market', 'the mall'],
+      ['the library', 'the station'], ['home', 'the stadium'],
+    ];
+    const [dest1, dest2] = pickFrom(destinations);
+    const A1 = p * k, B1 = q * k, A2 = p * m;
+    return {
+      question: `${nameA} takes ${A1} min to go to ${dest1}. ${nameB} takes ${B1} min for the same route. If ${nameA} takes ${A2} min to go to ${dest2}, how long does ${nameB} take?`,
+      answer: q * m,
+    };
+  },
+  // --- Proportion story: pages read ---
+  () => {
+    const [p, q] = pickFrom(PROP_STORY_PAIRS);
+    const k = rand(5, 14); const m = rand(8, 22);
+    const [nameA, nameB] = pickFrom(PERSON_NAMES);
+    const A1 = p * k, B1 = q * k, A2 = p * m;
+    return {
+      question: `${nameA} reads ${A1} pages in 1 hour. ${nameB} reads ${B1} pages in 1 hour. If ${nameA} reads ${A2} pages in a day, how many pages does ${nameB} read in the same time?`,
+      answer: q * m,
+    };
+  },
+  // --- Proportion story: money earned ---
+  () => {
+    const [p, q] = pickFrom(PROP_STORY_PAIRS);
+    const k = rand(6, 16); const m = rand(7, 20);
+    const [nameA, nameB] = pickFrom(PERSON_NAMES);
+    const A1 = p * k, B1 = q * k, A2 = p * m;
+    return {
+      question: `${nameA} earns ₹${A1} per day. ${nameB} earns ₹${B1} per day. If ${nameA} earns ₹${A2} in a week, how much does ${nameB} earn in the same number of days?`,
+      answer: q * m,
+    };
+  },
+  // --- Proportion story: distance walked / cycled ---
+  () => {
+    const [p, q] = pickFrom(PROP_STORY_PAIRS);
+    const k = rand(5, 14); const m = rand(8, 22);
+    const [nameA, nameB] = pickFrom(PERSON_NAMES);
+    const mode = pickFrom(['walks', 'cycles', 'runs']);
+    const A1 = p * k, B1 = q * k, A2 = p * m;
+    return {
+      question: `${nameA} ${mode} ${A1} km in 2 hours. ${nameB} ${mode} ${B1} km in 2 hours. If ${nameA} covers ${A2} km in a day, how far does ${nameB} cover in the same time?`,
+      answer: q * m,
+    };
+  },
+  // --- Proportion story: litres filled by taps ---
+  () => {
+    const [p, q] = pickFrom(PROP_STORY_PAIRS);
+    const k = rand(6, 15); const m = rand(8, 22);
+    const A1 = p * k, B1 = q * k, A2 = p * m;
+    return {
+      question: `Tap A fills ${A1} litres per hour. Tap B fills ${B1} litres per hour. If Tap A fills ${A2} litres in a session, how many litres does Tap B fill in the same time?`,
+      answer: q * m,
+    };
+  },
+  // --- Proportion story: bricks laid by workers ---
+  () => {
+    const [p, q] = pickFrom(PROP_STORY_PAIRS);
+    const k = rand(5, 14); const m = rand(8, 20);
+    const [nameA, nameB] = pickFrom(PERSON_NAMES);
+    const A1 = p * k, B1 = q * k, A2 = p * m;
+    return {
+      question: `${nameA} lays ${A1} bricks per hour. ${nameB} lays ${B1} bricks per hour. If ${nameA} lays ${A2} bricks in a day, how many bricks does ${nameB} lay in the same time?`,
+      answer: q * m,
+    };
+  },
+  // --- Class boys/girls ---
+  () => {
+    const pairs: [number, number][] = [[2, 3], [3, 4], [3, 5], [4, 5], [5, 7]];
     const [p, q] = pickFrom(pairs);
-    const k      = rand(2, 7);
-    const total  = (p + q) * k;
-    const girls  = q * k;
+    const k = rand(4, 12);
+    const total = (p + q) * k;
     return {
       question: `A class of ${total} students has boys to girls in ratio ${p} : ${q}.  Girls = ?`,
-      answer: girls,
+      answer: q * k,
     };
   },
-  // Recipe / mixture
+  // --- Money sharing ---
   () => {
-    const pairs  = [[1, 2], [1, 3], [2, 3], [3, 4], [2, 5]];
+    const pairs: [number, number][] = [[2, 3], [3, 5], [1, 4], [4, 5], [3, 7]];
     const [p, q] = pickFrom(pairs);
-    const k      = rand(2, 8);
-    const flour  = p * k;
-    const sugar  = q * k;
-    // Ask for one given the other
-    const askFlour = Math.random() > 0.5;
-    return {
-      question: askFlour
-        ? `Flour : Sugar = ${p} : ${q}.  Sugar = ${sugar},  Flour = ?`
-        : `Flour : Sugar = ${p} : ${q}.  Flour = ${flour},  Sugar = ?`,
-      answer: askFlour ? flour : sugar,
-    };
-  },
-  // Map scale
-  () => {
-    const scales = [[1, 5], [1, 10], [2, 5], [1, 4], [3, 7]];
-    const [p, q] = pickFrom(scales);
-    const k      = rand(2, 6);
-    const map    = p * k;
-    const real   = q * k;
-    return {
-      question: `Map : Real = ${p} : ${q}.  Map = ${map} cm,  Real distance = ?`,
-      answer: real,
-    };
-  },
-  // Money sharing
-  () => {
-    const pairs  = [[2, 3], [3, 5], [1, 4], [4, 5], [3, 7]];
-    const [p, q] = pickFrom(pairs);
-    const k      = rand(5, 15);
-    const total  = (p + q) * k;
+    const k = rand(8, 20);
+    const total = (p + q) * k;
     const larger = Math.max(p, q) * k;
+    const [nameA, nameB] = pickFrom(PERSON_NAMES);
     return {
-      question: `₹${total} shared in ratio ${p} : ${q}.  Larger share = ?`,
+      question: `₹${total} is shared between ${nameA} and ${nameB} in ratio ${p} : ${q}.  Larger share = ?`,
       answer: larger,
     };
   },
