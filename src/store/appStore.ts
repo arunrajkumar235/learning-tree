@@ -16,7 +16,8 @@ export interface Question {
   answer: number;
   options: number[];
   type: 'addition' | 'subtraction' | 'multiplication' | 'division'
-      | 'ratio-simplify' | 'ratio-equivalent' | 'ratio-missing' | 'ratio-share' | 'ratio-word';
+      | 'ratio-simplify' | 'ratio-equivalent' | 'ratio-missing' | 'ratio-share' | 'ratio-word'
+      | 'algebra-one-step' | 'algebra-two-step' | 'algebra-word';
   emoji: string;
 }
 

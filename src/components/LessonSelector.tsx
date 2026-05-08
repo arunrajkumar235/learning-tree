@@ -66,6 +66,33 @@ const RATIO_LEVELS: LessonDifficulty[] = [
   },
 ];
 
+const ALGEBRA_LEVELS: LessonDifficulty[] = [
+  {
+    id: 'easy',
+    label: 'Easy',
+    emoji: '🌟',
+    color: 'from-green-400 to-emerald-500',
+    shadow: 'shadow-green-200 dark:shadow-green-900',
+    details: ['x + a = b, ax = b', 'Numbers 1–15', 'One-step equations'],
+  },
+  {
+    id: 'medium',
+    label: 'Medium',
+    emoji: '⚡',
+    color: 'from-yellow-400 to-orange-500',
+    shadow: 'shadow-yellow-200 dark:shadow-yellow-900',
+    details: ['ax + b = c', 'Numbers up to 50', 'Two-step equations'],
+  },
+  {
+    id: 'hard',
+    label: 'Hard',
+    emoji: '🔥',
+    color: 'from-red-400 to-rose-600',
+    shadow: 'shadow-red-200 dark:shadow-red-900',
+    details: ['Both sides, word problems', 'Numbers up to 100', 'No timer'],
+  },
+];
+
 const SPELLING_LEVELS: LessonDifficulty[] = [
   {
     id: 'easy',
@@ -138,6 +165,15 @@ const SUBJECT_CONFIG: Record<string, SubjectConfig> = {
         color: 'from-purple-500 to-violet-600',
         shadow: 'shadow-purple-200 dark:shadow-purple-900',
         levels: RATIO_LEVELS,
+      },
+      {
+        lessonKey: 'linear-algebra',
+        label: 'Linear Equations',
+        emoji: '🔣',
+        tagline: 'Solve for x and crack the equation!',
+        color: 'from-sky-400 to-blue-600',
+        shadow: 'shadow-sky-200 dark:shadow-sky-900',
+        levels: ALGEBRA_LEVELS,
       },
     ],
   },
