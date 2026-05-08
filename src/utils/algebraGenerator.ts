@@ -47,35 +47,44 @@ function generateWrongOptions(correct: number, count: number): number[] {
 }
 
 // ---------------------------------------------------------------------------
-// Easy: one-step equations, x in 2–15
+// Easy: two-step equations, x in 3–20 (upgraded from trivial one-step)
 // ---------------------------------------------------------------------------
 function generateEasyOneStep(): { question: string; answer: number } {
   const kind = rand(1, 4);
 
   if (kind === 1) {
-    // x + a = b
-    const x = rand(2, 15);
-    const a = rand(1, 12);
-    const b = x + a;
-    return { question: `x + ${a} = ${b}`, answer: x };
+    // ax + b = c
+    const a = rand(2, 5);
+    const x = rand(3, 18);
+    const b = rand(2, 15);
+    const c = a * x + b;
+    return { question: `${a}x + ${b} = ${c}`, answer: x };
   } else if (kind === 2) {
-    // x − a = b
-    const x = rand(3, 15);
-    const a = rand(1, 10);
-    const b = x - a;
-    return { question: `x − ${a} = ${b}`, answer: x };
+    // ax − b = c
+    const a = rand(2, 5);
+    const x = rand(4, 18);
+    const b = rand(2, 15);
+    const c = a * x - b;
+    if (c <= 0) {
+      const a2 = rand(2, 4); const x2 = rand(5, 18); const b2 = rand(2, 10);
+      return { question: `${a2}x − ${b2} = ${a2 * x2 - b2}`, answer: x2 };
+    }
+    return { question: `${a}x − ${b} = ${c}`, answer: x };
   } else if (kind === 3) {
-    // ax = b  (show as "3x = 12")
-    const a = rand(2, 9);
-    const x = rand(2, 12);
-    const b = a * x;
-    return { question: `${a}x = ${b}`, answer: x };
+    // x / a + b = c  →  x = (c - b) * a
+    const a = rand(2, 5);
+    const b = rand(2, 12);
+    const diff = rand(3, 12);          // diff = c - b, so x = diff * a
+    const c = b + diff;
+    const x = diff * a;
+    return { question: `x / ${a} + ${b} = ${c}`, answer: x };
   } else {
-    // x / a = b
-    const a = rand(2, 6);
-    const b = rand(2, 8);
-    const x = a * b;
-    return { question: `x / ${a} = ${b}`, answer: x };
+    // x / a − b = c  →  x = (c + b) * a
+    const a = rand(2, 5);
+    const b = rand(2, 10);
+    const c = rand(3, 15);
+    const x = (c + b) * a;
+    return { question: `x / ${a} − ${b} = ${c}`, answer: x };
   }
 }
 
@@ -120,117 +129,191 @@ function generateMediumEquation(): { question: string; answer: number; type: Alg
 }
 
 // ---------------------------------------------------------------------------
-// Hard: two-step (larger numbers) + variables on both sides, x in 5–25
+// Hard: paper-and-pen level — expand brackets, collect like terms, fractions
+// Variables on both sides with larger coefficients; x up to 40
 // No timer, no auto-eliminate
 // ---------------------------------------------------------------------------
 function generateHardEquation(): { question: string; answer: number; type: AlgebraOpType } {
-  const kind = rand(1, 4);
+  const kind = rand(1, 5);
 
   if (kind === 1) {
-    // ax + b = c
-    const a = rand(3, 9);
-    const x = rand(5, 25);
-    const b = rand(5, 30);
-    const c = a * x + b;
-    return { question: `${a}x + ${b} = ${c}`, answer: x, type: 'algebra-two-step' };
+    // a(bx + c) = d  — expand then solve  e.g. 3(2x + 5) = 33
+    const a = rand(2, 6);
+    const b = rand(2, 5);
+    const x = rand(3, 20);
+    const c = rand(2, 12);
+    const d = a * (b * x + c);
+    return { question: `${a}(${b}x + ${c}) = ${d}`, answer: x, type: 'algebra-two-step' };
   } else if (kind === 2) {
-    // ax − b = c
-    const a = rand(3, 8);
-    const x = rand(6, 20);
-    const b = rand(5, 25);
-    const c = a * x - b;
-    if (c <= 0) {
-      const a2 = rand(4, 8); const x2 = rand(6, 20); const b2 = rand(4, 20);
-      return { question: `${a2}x − ${b2} = ${a2 * x2 - b2}`, answer: x2, type: 'algebra-two-step' };
+    // ax + b(x − c) = d  — expand and collect  e.g. 4x + 3(x − 2) = 27
+    const a = rand(2, 7);
+    const b = rand(2, 5);
+    const x = rand(4, 25);
+    const c = rand(2, 10);
+    const d = (a + b) * x - b * c;
+    if (d <= 0) {
+      const a2 = rand(3, 6); const b2 = rand(2, 4); const x2 = rand(5, 20); const c2 = rand(2, 8);
+      return { question: `${a2}(${b2}x + ${c2}) = ${a2 * (b2 * x2 + c2)}`, answer: x2, type: 'algebra-two-step' };
     }
-    return { question: `${a}x − ${b} = ${c}`, answer: x, type: 'algebra-two-step' };
+    return { question: `${a}x + ${b}(x − ${c}) = ${d}`, answer: x, type: 'algebra-two-step' };
   } else if (kind === 3) {
-    // x/a + b = c  → x = (c - b) * a
-    const a = rand(3, 6);
-    const b = rand(5, 20);
-    const c = rand(b + 2, b + 20);   // ensure c > b so x > 0
-    const x = (c - b) * a;
-    return { question: `x / ${a} + ${b} = ${c}`, answer: x, type: 'algebra-two-step' };
-  } else {
-    // ax + b = cx + d  (variables on both sides, a > c so x > 0)
+    // a(x + b) = c(x + d)  — distribute both sides  e.g. 5(x + 4) = 2(x + 13)
+    // (a − c)x = c*d − a*b  →  construct: pick a > c, x, b, then d = ((a−c)*x + a*b) / c
     const c = rand(2, 4);
-    const a = c + rand(2, 5);        // a > c
-    const x = rand(3, 15);
-    const b = rand(1, 15);
-    const d = (a - c) * x + b;      // d = ax + b - cx → rearranges to x = (d-b)/(a-c)
+    const a = c + rand(2, 6);
+    const x = rand(3, 20);
+    // Choose b as multiple of c to guarantee integer d
+    const bMult = rand(1, 5);
+    const b = bMult * c;
+    const d = ((a - c) * x + a * b) / c;   // always integer since b = bMult*c → a*b = a*bMult*c
+    if (d > 0 && Number.isInteger(d) && d !== b) {
+      return { question: `${a}(x + ${b}) = ${c}(x + ${d})`, answer: x, type: 'algebra-two-step' };
+    }
+    // fallback
+    const a2 = rand(3, 7); const x2 = rand(4, 18); const c2 = rand(2, 10);
+    return { question: `${a2}(${rand(2, 3)}x + ${c2}) = ${a2 * (rand(2, 3) * x2 + c2)}`, answer: x2, type: 'algebra-two-step' };
+  } else if (kind === 4) {
+    // (ax + b) / c = d  — fractional  e.g. (3x + 6) / 4 = 9
+    // Construct: pick c, d, a, x → b = d*c − a*x  (ensure b > 0)
+    const c = rand(2, 6);
+    const d = rand(5, 18);
+    const a = rand(2, 5);
+    const x = rand(2, 12);
+    const b = d * c - a * x;
+    if (b >= 1) return { question: `(${a}x + ${b}) / ${c} = ${d}`, answer: x, type: 'algebra-two-step' };
+    // try different x
+    const x2 = rand(2, 8);
+    const b2 = d * c - a * x2;
+    if (b2 >= 1) return { question: `(${a}x + ${b2}) / ${c} = ${d}`, answer: x2, type: 'algebra-two-step' };
+    // fallback to kind 1
+    const a3 = rand(3, 6); const b3 = rand(2, 5); const x3 = rand(3, 18); const c3 = rand(2, 10);
+    return { question: `${a3}(${b3}x + ${c3}) = ${a3 * (b3 * x3 + c3)}`, answer: x3, type: 'algebra-two-step' };
+  } else {
+    // ax + b = cx + d  with larger numbers (variables on both sides)
+    const c = rand(2, 6);
+    const a = c + rand(3, 8);
+    const x = rand(6, 40);
+    const b = rand(5, 30);
+    const d = (a - c) * x + b;
     return { question: `${a}x + ${b} = ${c}x + ${d}`, answer: x, type: 'algebra-two-step' };
   }
 }
 
 // ---------------------------------------------------------------------------
-// Hard: word problems about finding a number
+// Hard: challenging word problems — age, perimeter, profit, consecutive numbers
+// Require setting up an equation and solving with paper and pen
 // ---------------------------------------------------------------------------
 const WORD_PROBLEM_TEMPLATES: Array<() => { question: string; answer: number }> = [
+  // Age problem — ratio then future sum
   () => {
-    const x = rand(5, 30);
-    const b = rand(3, 20);
-    return { question: `A number increased by ${b} gives ${x + b}. Find the number.`, answer: x };
-  },
-  () => {
-    const x = rand(5, 25);
-    const b = rand(2, 15);
-    return { question: `When ${b} is subtracted from a number, the result is ${x - b}. Find the number.`, answer: x };
-  },
-  () => {
-    const a = pickFrom([2, 3, 4, 5]);
-    const x = rand(4, 20);
-    return { question: `${a} times a number equals ${a * x}. Find the number.`, answer: x };
-  },
-  () => {
+    // Priya is k times as old as Rahul (x). In y years their ages sum to S.
+    // (x + y) + (kx + y) = S → (k+1)x + 2y = S → x = (S - 2y)/(k+1)
+    const k = pickFrom([2, 3, 4]);
+    const y = rand(2, 8);
     const x = rand(5, 20);
-    const b = rand(2, 12);
-    return { question: `Twice a number plus ${b} gives ${2 * x + b}. Find the number.`, answer: x };
+    const S = (k + 1) * x + 2 * y;
+    const names: [string, string][] = [['Priya', 'Rahul'], ['Anita', 'Dev'], ['Kavya', 'Arjun'], ['Meera', 'Rohit']];
+    const [nameA, nameB] = pickFrom(names);
+    return {
+      question: `${nameA} is ${k} times as old as ${nameB}. In ${y} years, the sum of their ages will be ${S}. Find ${nameB}'s current age.`,
+      answer: x,
+    };
   },
+  // Rectangle perimeter
   () => {
-    const a = pickFrom([3, 4, 5]);
-    const x = rand(4, 18);
-    const b = rand(2, 10);
-    return { question: `${a} times a number minus ${b} equals ${a * x - b}. Find the number.`, answer: x };
+    // Length = 2*width + extra, Perimeter = 2*(l + w) = P → 2*(2w + extra + w) = P → 6w + 2*extra = P
+    const w = rand(5, 25);
+    const extra = rand(3, 12);
+    const l = 2 * w + extra;
+    const P = 2 * (l + w);
+    return {
+      question: `The length of a rectangle is ${extra} cm more than twice its width. If the perimeter is ${P} cm, find the width.`,
+      answer: w,
+    };
   },
+  // Two-person sharing — sum and ratio
   () => {
-    const x = rand(5, 25);
-    const a = pickFrom([2, 3, 4]);
-    const b = rand(3, 15);
-    const c = x * a + b;
-    const names = ['Riya', 'Rahul', 'Priya', 'Arjun', 'Kavya', 'Dev'];
-    const name = pickFrom(names);
-    const items = ['pencils', 'books', 'marbles', 'stickers', 'coins'];
+    // A has k times as many as B (x). Together = T → kx + x = T → x = T/(k+1)
+    const k = pickFrom([2, 3, 4, 5]);
+    const x = rand(4, 20);
+    const T = (k + 1) * x;
+    const names: [string, string][] = [['Roshan', 'Vaibhav'], ['Riya', 'Sana'], ['Amir', 'Vivek'], ['Pooja', 'Nisha']];
+    const [nameA, nameB] = pickFrom(names);
+    const items = ['marbles', 'books', 'stickers', 'coins', 'cards'];
     const item = pickFrom(items);
     return {
-      question: `${name} has some ${item}. After buying ${a} times as many and getting ${b} more, ${name} has ${c} in total. How many did ${name} start with?`,
+      question: `${nameA} has ${k} times as many ${item} as ${nameB}. Together they have ${T} ${item}. How many does ${nameB} have?`,
       answer: x,
     };
   },
+  // Consecutive numbers
   () => {
-    const x = rand(6, 25);
-    const b = rand(3, 15);
-    const names = ['Rohan', 'Nisha', 'Amir', 'Pooja', 'Vivek'];
-    const name = pickFrom(names);
+    // n + (n+2) + (n+4) = S (3 consecutive odd/even numbers)
+    const x = rand(5, 30) * 2 + 1;   // start with odd
+    const S = x + (x + 2) + (x + 4);
     return {
-      question: `${name} thinks of a number, doubles it, and adds ${b}. The result is ${2 * x + b}. What was the number?`,
+      question: `The sum of three consecutive odd numbers is ${S}. Find the smallest number.`,
       answer: x,
     };
   },
+  // Profit problem
   () => {
-    const x = rand(5, 20);
-    const a = pickFrom([2, 3, 5]);
-    const c = x / a;                   // ensure x divisible by a
-    if (!Number.isInteger(c) || c < 2) {
-      const x2 = a * rand(2, 8);
-      return { question: `A number divided by ${a} equals ${x2 / a}. Find the number.`, answer: x2 };
-    }
-    return { question: `A number divided by ${a} equals ${c}. Find the number.`, answer: x };
+    // Sold at price s, bought at price b, profit per item = s - b, total profit = P → n*(s-b) = P
+    const b = rand(3, 8) * 5;
+    const s = b + rand(2, 5) * 5;
+    const n = rand(5, 20);
+    const P = n * (s - b);
+    return {
+      question: `A shopkeeper buys pens at ₹${b} each and sells them at ₹${s} each. If his total profit is ₹${P}, how many pens did he sell?`,
+      answer: n,
+    };
+  },
+  // Coins problem
+  () => {
+    // x ₹5 coins + (T - x) ₹2 coins = total amount
+    // 5x + 2(T - x) = A → 3x + 2T = A → x = (A - 2T) / 3
+    const T = rand(10, 25);
+    const x = rand(3, T - 2);
+    const A = 5 * x + 2 * (T - x);
+    return {
+      question: `A piggy bank has ${T} coins, all either ₹5 or ₹2. The total amount is ₹${A}. How many ₹5 coins are there?`,
+      answer: x,
+    };
+  },
+  // Distance problem
+  () => {
+    // Two people walk toward each other. Speed A = sA, speed B = sB, distance = D
+    // They meet after t hours: sA*t + sB*t = D → t*(sA+sB) = D
+    const sA = rand(3, 8);
+    const sB = rand(2, 6);
+    const t = rand(2, 5);
+    const D = (sA + sB) * t;
+    const names: [string, string][] = [['Roshan', 'Priya'], ['Arjun', 'Meera'], ['Dev', 'Kavya']];
+    const [nameA, nameB] = pickFrom(names);
+    return {
+      question: `${nameA} and ${nameB} start walking toward each other from towns ${D} km apart. ${nameA} walks at ${sA} km/h and ${nameB} at ${sB} km/h. After how many hours do they meet?`,
+      answer: t,
+    };
+  },
+  // Number relation with equation on both sides
+  () => {
+    // "If you add a to n and multiply by b, you get c more than d times n"
+    // b(n + a) = d*n + c → b*n + b*a = d*n + c → (b-d)*n = c - b*a → n = (c - b*a)/(b-d)
+    const d = rand(2, 4);
+    const b = d + rand(2, 4);          // b > d
+    const n = rand(4, 20);
+    const a = rand(2, 10);
+    const c = b * (n + a) - d * n;    // c = b*n + b*a - d*n = (b-d)*n + b*a
+    if (c <= 0) return { question: `Twice a number increased by 9 equals 3 more than the number. Find the number.`, answer: 3 - 9 };  // placeholder rarely hit
+    return {
+      question: `When ${a} is added to a number and the result is multiplied by ${b}, the answer is ${c} more than ${d} times the number. Find the number.`,
+      answer: n,
+    };
   },
 ];
 
 function generateWordProblem(): { question: string; answer: number } {
   const gen = pickFrom(WORD_PROBLEM_TEMPLATES)();
-  // ensure answer is positive integer
   if (!Number.isInteger(gen.answer) || gen.answer <= 0) {
     return generateWordProblem();
   }
@@ -256,9 +339,9 @@ export function generateAlgebraQuestion(difficulty: Difficulty): Question {
     question = gen.question;
     answer   = gen.answer;
   } else {
-    // hard — mix two-step, both-sides, and word problems
+    // hard — 40% equation types, 60% word problems (require more thinking)
     const roll = Math.random();
-    if (roll < 0.45) {
+    if (roll < 0.40) {
       const gen = generateHardEquation();
       opType   = gen.type;
       question = gen.question;

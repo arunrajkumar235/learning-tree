@@ -89,7 +89,7 @@ const ALGEBRA_LEVELS: LessonDifficulty[] = [
     emoji: '🔥',
     color: 'from-red-400 to-rose-600',
     shadow: 'shadow-red-200 dark:shadow-red-900',
-    details: ['Both sides, word problems', 'Numbers up to 100', 'No timer'],
+    details: ['Expand & collect terms', 'Fractions, both sides', 'Word problems — no timer'],
   },
 ];
 
