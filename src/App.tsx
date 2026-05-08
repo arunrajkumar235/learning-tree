@@ -6,10 +6,12 @@ import LessonSelector from './components/LessonSelector';
 import QuestionCard from './components/QuestionCard';
 import InverseArithmeticCard from './components/InverseArithmeticCard';
 import SpellingCard from './components/SpellingCard';
+import RatioProportionCard from './components/RatioProportionCard';
 import QuizComplete from './components/QuizComplete';
 import { generateQuestion } from './utils/questionGenerator';
 import { generateInverseQuestion } from './utils/inverseQuestionGenerator';
 import { generateSpellingQuestion } from './utils/wordList';
+import { generateRatioProportionQuestion } from './utils/ratioProportionGenerator';
 
 const App = observer(() => {
   const { selectedSubject, selectedLesson, currentQuestion, currentSpellingWord, currentInverseQuestion, difficulty, isDarkMode, quizComplete, showSuccess, gameKey } = appStore;
@@ -22,6 +24,8 @@ const App = observer(() => {
         appStore.setInverseQuestion(generateInverseQuestion(difficulty));
       } else if (selectedLesson === 'spellings' && !currentSpellingWord) {
         appStore.setSpellingWord(generateSpellingQuestion(difficulty));
+      } else if (selectedLesson === 'ratio-proportion' && !currentQuestion) {
+        appStore.setQuestion(generateRatioProportionQuestion(difficulty));
       }
     }
   }, [selectedSubject, selectedLesson, difficulty, gameKey]);
@@ -56,6 +60,7 @@ const App = observer(() => {
         {selectedSubject && selectedLesson === 'arithmetic' && currentQuestion && !showResults && <QuestionCard />}
         {selectedSubject && selectedLesson === 'inverse-arithmetic' && currentInverseQuestion && !showResults && <InverseArithmeticCard />}
         {selectedSubject && selectedLesson === 'spellings' && currentSpellingWord && !showResults && <SpellingCard />}
+        {selectedSubject && selectedLesson === 'ratio-proportion' && currentQuestion && !showResults && <RatioProportionCard />}
       </main>
 
       <footer className="text-center py-3 text-xs text-gray-400 dark:text-gray-600 font-medium">

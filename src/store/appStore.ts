@@ -15,7 +15,8 @@ export interface Question {
   question: string;
   answer: number;
   options: number[];
-  type: 'addition' | 'subtraction' | 'multiplication' | 'division';
+  type: 'addition' | 'subtraction' | 'multiplication' | 'division'
+      | 'ratio-simplify' | 'ratio-equivalent' | 'ratio-missing' | 'ratio-share' | 'ratio-word';
   emoji: string;
 }
 

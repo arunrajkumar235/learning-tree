@@ -39,6 +39,33 @@ const ARITHMETIC_LEVELS: LessonDifficulty[] = [
   },
 ];
 
+const RATIO_LEVELS: LessonDifficulty[] = [
+  {
+    id: 'easy',
+    label: 'Easy',
+    emoji: '🌟',
+    color: 'from-green-400 to-emerald-500',
+    shadow: 'shadow-green-200 dark:shadow-green-900',
+    details: ['Numbers 1–20', 'Simplify ratios', 'Equivalent ratios'],
+  },
+  {
+    id: 'medium',
+    label: 'Medium',
+    emoji: '⚡',
+    color: 'from-yellow-400 to-orange-500',
+    shadow: 'shadow-yellow-200 dark:shadow-yellow-900',
+    details: ['Numbers up to 100', 'Missing term', 'Share quantities'],
+  },
+  {
+    id: 'hard',
+    label: 'Hard',
+    emoji: '🔥',
+    color: 'from-red-400 to-rose-600',
+    shadow: 'shadow-red-200 dark:shadow-red-900',
+    details: ['Numbers up to 200', 'Fourth proportional', 'Word problems'],
+  },
+];
+
 const SPELLING_LEVELS: LessonDifficulty[] = [
   {
     id: 'easy',
@@ -102,6 +129,15 @@ const SUBJECT_CONFIG: Record<string, SubjectConfig> = {
         color: 'from-teal-400 to-cyan-500',
         shadow: 'shadow-teal-200 dark:shadow-teal-900',
         levels: ARITHMETIC_LEVELS,
+      },
+      {
+        lessonKey: 'ratio-proportion',
+        label: 'Ratio & Proportion',
+        emoji: '⚖️',
+        tagline: 'Simplify, compare and share using ratios!',
+        color: 'from-purple-500 to-violet-600',
+        shadow: 'shadow-purple-200 dark:shadow-purple-900',
+        levels: RATIO_LEVELS,
       },
     ],
   },
