@@ -39,19 +39,19 @@ const AlgebraCard = observer(() => {
   const successTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [elapsed, setElapsed] = useState(0);
 
-  // Per-question timer (hidden on hard difficulty)
+  // Per-question timer (easy only)
   useEffect(() => {
     setElapsed(0);
-    if (showSuccess || difficulty === 'hard') return;
+    if (showSuccess || difficulty !== 'easy') return;
     const interval = setInterval(() => {
       setElapsed(Math.floor((Date.now() - appStore.questionStartTime) / 1000));
     }, 1000);
     return () => clearInterval(interval);
   }, [currentQuestion?.id, showSuccess, difficulty]);
 
-  // Auto-eliminate a wrong option every 10 seconds (disabled on hard)
+  // Auto-eliminate a wrong option every 10 seconds (easy only)
   useEffect(() => {
-    if (showSuccess || quizComplete || difficulty === 'hard') return;
+    if (showSuccess || quizComplete || difficulty !== 'easy') return;
     const interval = setInterval(() => {
       if (appStore.showSuccess || appStore.quizComplete || !appStore.currentQuestion) return;
       const { options, answer } = appStore.currentQuestion;
@@ -143,7 +143,7 @@ const AlgebraCard = observer(() => {
           <span className="text-sm font-bold text-gray-500 dark:text-gray-400">
             Question {currentQuestionNumber} / {QUIZ_QUESTION_LIMIT}
           </span>
-          {difficulty !== 'hard' && (
+          {difficulty === 'easy' && (
             <span
               className={`text-sm font-bold tabular-nums flex items-center gap-1 ${
                 timerWarning
