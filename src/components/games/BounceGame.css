@@ -1,0 +1,310 @@
+.game-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  user-select: none;
+}
+
+.hud {
+  display: flex;
+  align-items: center;
+  gap: 32px;
+  width: 500px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  padding: 10px 20px;
+  backdrop-filter: blur(10px);
+}
+
+.hud-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.hud-item.lives-display {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+}
+
+.heart {
+  font-size: 20px;
+  line-height: 1;
+  transition: opacity 0.2s;
+}
+
+.heart-full {
+  color: #f72585;
+  filter: drop-shadow(0 0 4px #f72585);
+}
+
+.heart-empty {
+  color: rgba(255, 255, 255, 0.15);
+}
+
+.level-val {
+  color: #f8961e;
+  min-width: 24px;
+}
+
+.hud-value.sm {
+  font-size: 14px;
+  min-width: 36px;
+}
+
+.final-level {
+  font-size: 16px;
+  color: rgba(255,255,255,0.6);
+  margin-top: -8px;
+}
+
+.level-span {
+  font-size: 20px;
+  font-weight: 700;
+  color: #f8961e;
+}
+
+.hud-label {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  color: rgba(255, 255, 255, 0.4);
+  text-transform: uppercase;
+}
+
+.hud-value {
+  font-size: 18px;
+  font-weight: 700;
+  color: #fff;
+  min-width: 48px;
+  text-align: right;
+}
+
+.speed-bar-wrapper {
+  flex: 1;
+  height: 8px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.speed-bar {
+  height: 100%;
+  border-radius: 4px;
+  transition: width 0.2s ease, background-color 0.3s ease;
+  box-shadow: 0 0 8px currentColor;
+}
+
+.canvas-wrapper {
+  position: relative;
+  border-radius: 4px;
+  overflow: hidden;
+  box-shadow: 0 0 40px rgba(114, 9, 183, 0.4), 0 0 80px rgba(114, 9, 183, 0.15);
+}
+
+canvas {
+  display: block;
+}
+
+.overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  background: rgba(10, 8, 30, 0.82);
+  backdrop-filter: blur(4px);
+}
+
+.game-title {
+  font-size: 72px;
+  font-weight: 900;
+  letter-spacing: 8px;
+  background: linear-gradient(135deg, #f72585, #7209b7, #4cc9f0);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-shadow: none;
+}
+
+.game-subtitle {
+  font-size: 18px;
+  color: rgba(255, 255, 255, 0.6);
+  margin-bottom: 8px;
+}
+
+.gameover-title {
+  font-size: 52px;
+  font-weight: 900;
+  letter-spacing: 6px;
+  color: #f72585;
+  text-shadow: 0 0 30px #f72585;
+}
+
+.final-score {
+  font-size: 20px;
+  color: rgba(255, 255, 255, 0.75);
+  margin-bottom: 12px;
+}
+
+.final-score span {
+  font-size: 28px;
+  font-weight: 700;
+  color: #4cc9f0;
+}
+
+.instructions {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.instructions li {
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.55);
+  padding: 6px 16px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.btn-start {
+  padding: 14px 48px;
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: #fff;
+  background: linear-gradient(135deg, #f72585, #7209b7);
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: transform 0.1s ease, box-shadow 0.2s ease;
+  box-shadow: 0 4px 24px rgba(247, 37, 133, 0.5);
+}
+
+.btn-start:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 32px rgba(247, 37, 133, 0.7);
+}
+
+.btn-start:active {
+  transform: translateY(0);
+}
+
+.controls-hint {
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.25);
+  letter-spacing: 1px;
+}
+
+/* ── Touch controls ──────────────────────────────────────────────────────── */
+.touch-controls {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  margin-top: 4px;
+}
+
+.touch-btn {
+  width: 80px;
+  height: 56px;
+  font-size: 24px;
+  font-weight: 700;
+  color: #fff;
+  background: rgba(255, 255, 255, 0.08);
+  border: 2px solid rgba(255, 255, 255, 0.15);
+  border-radius: 10px;
+  cursor: pointer;
+  touch-action: none;
+  user-select: none;
+  transition: background 0.1s;
+}
+
+.touch-btn:active {
+  background: rgba(247, 37, 133, 0.35);
+  border-color: #f72585;
+}
+
+.launch-btn {
+  width: 100px;
+  height: 56px;
+  font-size: 14px;
+  letter-spacing: 2px;
+  background: rgba(114, 9, 183, 0.4);
+  border-color: #7209b7;
+}
+
+/* ── Initials input ───────────────────────────────────────────────────────── */
+.initials-input {
+  width: 100px;
+  padding: 10px;
+  font-size: 28px;
+  font-weight: 700;
+  letter-spacing: 12px;
+  text-align: center;
+  text-transform: uppercase;
+  background: rgba(255, 255, 255, 0.08);
+  border: 2px solid rgba(255, 255, 255, 0.25);
+  border-radius: 8px;
+  color: #fff;
+  outline: none;
+}
+
+.initials-input:focus {
+  border-color: #f72585;
+}
+
+/* ── Leaderboard ──────────────────────────────────────────────────────────── */
+.leaderboard {
+  width: 100%;
+  max-width: 300px;
+  margin: 0 auto;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.leaderboard th {
+  color: rgba(255, 255, 255, 0.4);
+  font-size: 11px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  padding: 4px 8px;
+  text-align: left;
+}
+
+.leaderboard td {
+  padding: 5px 8px;
+  color: rgba(255, 255, 255, 0.75);
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.leaderboard tr.highlight td {
+  color: #f72585;
+  font-weight: 700;
+}
+
+/* ── Active power-ups in HUD ──────────────────────────────────────────────── */
+.active-powerups {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  min-height: 24px;
+  flex: 1;
+}
+
+.powerup-badge {
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 4px;
+  color: #000;
+  letter-spacing: 1px;
+}

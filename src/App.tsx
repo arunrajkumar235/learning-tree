@@ -2,6 +2,7 @@ import { observer } from 'mobx-react';
 import { useEffect } from 'react';
 import { appStore } from './store/appStore';
 import SubjectSelector from './components/SubjectSelector';
+import GamesPage from './components/GamesPage';
 import LessonSelector from './components/LessonSelector';
 import QuestionCard from './components/QuestionCard';
 import InverseArithmeticCard from './components/InverseArithmeticCard';
@@ -58,14 +59,25 @@ const App = observer(() => {
 
       {/* Main content */}
       <main className="flex-1 flex items-center justify-center px-4 py-8">
+        {selectedSubject === 'games' && (
+          <div className="flex flex-col items-center gap-4 w-full max-w-3xl">
+            <button
+              onClick={() => appStore.resetSubject()}
+              className="self-start flex items-center gap-2 px-4 py-2 rounded-xl bg-white dark:bg-gray-800 shadow text-sm font-semibold text-gray-600 dark:text-gray-300 hover:scale-105 active:scale-95 transition-all border border-gray-100 dark:border-gray-700 cursor-pointer"
+            >
+              ← Back to Subjects
+            </button>
+            <GamesPage />
+          </div>
+        )}
         {!selectedSubject && <SubjectSelector />}
-        {selectedSubject && !selectedLesson && <LessonSelector />}
-        {selectedSubject && selectedLesson && showResults && <QuizComplete />}
-        {selectedSubject && selectedLesson === 'arithmetic' && currentQuestion && !showResults && <QuestionCard />}
-        {selectedSubject && selectedLesson === 'inverse-arithmetic' && currentInverseQuestion && !showResults && <InverseArithmeticCard />}
-        {selectedSubject && selectedLesson === 'spellings' && currentSpellingWord && !showResults && <SpellingCard />}
-        {selectedSubject && selectedLesson === 'ratio-proportion' && currentQuestion && !showResults && <RatioProportionCard />}
-        {selectedSubject && selectedLesson === 'linear-algebra' && currentQuestion && !showResults && <AlgebraCard />}
+        {selectedSubject && selectedSubject !== 'games' && !selectedLesson && <LessonSelector />}
+        {selectedSubject && selectedSubject !== 'games' && selectedLesson && showResults && <QuizComplete />}
+        {selectedSubject && selectedSubject !== 'games' && selectedLesson === 'arithmetic' && currentQuestion && !showResults && <QuestionCard />}
+        {selectedSubject && selectedSubject !== 'games' && selectedLesson === 'inverse-arithmetic' && currentInverseQuestion && !showResults && <InverseArithmeticCard />}
+        {selectedSubject && selectedSubject !== 'games' && selectedLesson === 'spellings' && currentSpellingWord && !showResults && <SpellingCard />}
+        {selectedSubject && selectedSubject !== 'games' && selectedLesson === 'ratio-proportion' && currentQuestion && !showResults && <RatioProportionCard />}
+        {selectedSubject && selectedSubject !== 'games' && selectedLesson === 'linear-algebra' && currentQuestion && !showResults && <AlgebraCard />}
       </main>
 
       <footer className="text-center py-3 text-xs text-gray-400 dark:text-gray-600 font-medium">

@@ -18,6 +18,14 @@ const subjects = [
     color: 'from-sky-400 to-blue-500',
     shadow: 'shadow-sky-200 dark:shadow-sky-900',
   },
+  {
+    id: 'games',
+    label: 'Games',
+    emoji: '🎮',
+    description: 'Play & have fun!',
+    color: 'from-purple-500 to-pink-500',
+    shadow: 'shadow-purple-200 dark:shadow-purple-900',
+  },
 ];
 
 const SubjectSelector = observer(() => {
