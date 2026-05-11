@@ -435,7 +435,6 @@ html:not(.dark) .options-slider::-moz-range-thumb {
 
 /* ── Options panel ──────────────────────────────────────────────────────── */
 .hud-options-btn {
-  margin-left: auto;
   width: 32px;
   height: 32px;
   font-size: 18px;
