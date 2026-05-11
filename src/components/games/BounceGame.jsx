@@ -327,10 +327,11 @@ function applyPowerup(type, state, setLives) {
 
 // ── Component ─────────────────────────────────────────────────────────────────
 export default function App() {
-  const canvasRef    = useRef(null)
-  const gameStateRef = useRef(null)
-  const animFrameRef = useRef(null)
-  const keysRef      = useRef({})
+  const canvasRef      = useRef(null)
+  const gameStateRef   = useRef(null)
+  const animFrameRef   = useRef(null)
+  const keysRef        = useRef({})
+  const canvasTouchRef = useRef(null) // canvas-drag touch: { id, x } or null
 
   const [score,               setScore]              = useState(0)
   const [gameStatus,          setGameStatus]          = useState('idle')
@@ -473,10 +474,18 @@ export default function App() {
       // ── 4. Move plank ──────────────────────────────────────────────────────
       const effectivePW   = getPlankWidth(state.activePowerups)
       state.plank.prevX   = state.plank.x
-      if (keysRef.current['ArrowLeft'])
-        state.plank.x = Math.max(WALL_THICKNESS, state.plank.x - PLANK_SPEED)
-      if (keysRef.current['ArrowRight'])
-        state.plank.x = Math.min(GAME_WIDTH - WALL_THICKNESS - effectivePW, state.plank.x + PLANK_SPEED)
+
+      // Canvas-drag: finger position maps directly to plank centre
+      if (canvasTouchRef.current !== null) {
+        const targetX = canvasTouchRef.current - effectivePW / 2
+        state.plank.x = Math.max(WALL_THICKNESS,
+          Math.min(GAME_WIDTH - WALL_THICKNESS - effectivePW, targetX))
+      } else {
+        if (keysRef.current['ArrowLeft'])
+          state.plank.x = Math.max(WALL_THICKNESS, state.plank.x - PLANK_SPEED)
+        if (keysRef.current['ArrowRight'])
+          state.plank.x = Math.min(GAME_WIDTH - WALL_THICKNESS - effectivePW, state.plank.x + PLANK_SPEED)
+      }
       state.plank.vx = state.plank.x - state.plank.prevX
 
       // ── 5. Process each ball ───────────────────────────────────────────────
@@ -751,7 +760,7 @@ export default function App() {
     const anim = () => {
       const t = Date.now() / 1000
       ctx.clearRect(0, 0, GAME_WIDTH, GAME_HEIGHT)
-      ctx.fillStyle = '#0f0c29'
+      ctx.fillStyle = getTheme().bg
       ctx.fillRect(0, 0, GAME_WIDTH, GAME_HEIGHT)
       drawWaterSection(ctx, WATER_SURFACE, WATER_HEIGHT, t)
       drawWalls(ctx, WATER_SURFACE)
@@ -808,7 +817,34 @@ export default function App() {
 
       {/* Canvas + overlays */}
       <div className="canvas-wrapper">
-        <canvas ref={canvasRef} width={GAME_WIDTH} height={GAME_HEIGHT} />
+        <canvas
+          ref={canvasRef}
+          width={GAME_WIDTH}
+          height={GAME_HEIGHT}
+          onTouchStart={e => {
+            // Only track a drag that starts in the lower third of the canvas (near the plank)
+            const rect  = e.currentTarget.getBoundingClientRect()
+            const scale = GAME_WIDTH / rect.width
+            const touch = e.changedTouches[0]
+            const canvasY = (touch.clientY - rect.top) * scale
+            if (canvasY >= PLANK_Y - 60) {
+              e.preventDefault()
+              canvasTouchRef.current = (touch.clientX - rect.left) * scale
+            }
+          }}
+          onTouchMove={e => {
+            if (canvasTouchRef.current === null) return
+            e.preventDefault()
+            const rect  = e.currentTarget.getBoundingClientRect()
+            const scale = GAME_WIDTH / rect.width
+            const touch = e.changedTouches[0]
+            canvasTouchRef.current = (touch.clientX - rect.left) * scale
+          }}
+          onTouchEnd={e => {
+            canvasTouchRef.current = null
+          }}
+          style={{ touchAction: 'none' }}
+        />
 
         {/* ── Idle overlay ── */}
         {gameStatus === 'idle' && (
@@ -945,6 +981,21 @@ function lighten(hex, amt) {
   return `rgb(${r},${g},${b})`
 }
 
+/** Returns a palette based on the current light/dark mode. */
+function getTheme() {
+  const dark = document.documentElement.classList.contains('dark')
+  return {
+    dark,
+    bg:        dark ? '#0f0c29'            : '#ede9f8',
+    wall:      dark ? '#1b1a3a'            : '#c4b8e8',
+    wallGlow:  dark ? 'rgba(150,150,255,0.12)' : 'rgba(90,60,180,0.12)',
+    levelOverlayBg:   dark ? 'rgba(8,6,24,0.78)'    : 'rgba(240,235,255,0.88)',
+    levelText:        dark ? '#f8f0ff'               : '#1a0a3a',
+    levelSubText:     dark ? 'rgba(255,255,255,0.55)': 'rgba(20,10,40,0.6)',
+    levelRadial0:     dark ? 'rgba(114,9,183,0.35)'  : 'rgba(114,9,183,0.18)',
+  }
+}
+
 function drawWaterSection(ctx, waterSurface, waterHeight, t) {
   // Base gradient
   const grad = ctx.createLinearGradient(0, waterSurface, 0, GAME_HEIGHT)
@@ -1003,12 +1054,13 @@ function drawWaterSection(ctx, waterSurface, waterHeight, t) {
 }
 
 function drawWalls(ctx, waterSurface) {
-  ctx.fillStyle = '#1b1a3a'
+  const { wall, wallGlow } = getTheme()
+  ctx.fillStyle = wall
   ctx.fillRect(0, 0, WALL_THICKNESS, waterSurface)
   ctx.fillRect(GAME_WIDTH - WALL_THICKNESS, 0, WALL_THICKNESS, waterSurface)
   ctx.fillRect(0, 0, GAME_WIDTH, WALL_THICKNESS)
   // Inner glow lines
-  ctx.fillStyle = 'rgba(150,150,255,0.12)'
+  ctx.fillStyle = wallGlow
   ctx.fillRect(WALL_THICKNESS,              0,           2, waterSurface)
   ctx.fillRect(GAME_WIDTH - WALL_THICKNESS - 2, 0,       2, waterSurface)
   ctx.fillRect(0,                           WALL_THICKNESS, GAME_WIDTH, 2)
@@ -1240,7 +1292,7 @@ function drawScene(ctx, state, now) {
 
   // Background
   ctx.clearRect(0, 0, GAME_WIDTH, GAME_HEIGHT)
-  ctx.fillStyle = '#0f0c29'
+  ctx.fillStyle = getTheme().bg
   ctx.fillRect(0, 0, GAME_WIDTH, GAME_HEIGHT)
 
   drawWaterSection(ctx, WATER_SURFACE, WATER_HEIGHT, t)
@@ -1298,25 +1350,26 @@ function drawScene(ctx, state, now) {
 
 /** Full-screen level-up banner. */
 function drawLevelBanner(ctx, nextLevel) {
+  const th = getTheme()
   ctx.save()
-  ctx.fillStyle = 'rgba(8,6,24,0.78)'
+  ctx.fillStyle = th.levelOverlayBg
   ctx.fillRect(0, 0, GAME_WIDTH, GAME_HEIGHT)
 
   const cx = GAME_WIDTH / 2, cy = GAME_HEIGHT / 2
   const rg = ctx.createRadialGradient(cx, cy, 10, cx, cy, 160)
-  rg.addColorStop(0, 'rgba(114,9,183,0.35)')
+  rg.addColorStop(0, th.levelRadial0)
   rg.addColorStop(1, 'rgba(114,9,183,0)')
   ctx.fillStyle = rg; ctx.fillRect(0, 0, GAME_WIDTH, GAME_HEIGHT)
 
   ctx.textAlign  = 'center'
   ctx.shadowColor = '#7209b7'; ctx.shadowBlur = 30
   ctx.font       = 'bold 56px Segoe UI'
-  ctx.fillStyle  = '#f8f0ff'
+  ctx.fillStyle  = th.levelText
   ctx.fillText(`LEVEL ${nextLevel}`, cx, cy - 10)
 
   ctx.shadowBlur = 0
   ctx.font       = '18px Segoe UI'
-  ctx.fillStyle  = 'rgba(255,255,255,0.55)'
+  ctx.fillStyle  = th.levelSubText
   ctx.fillText('All bricks cleared! Get ready…', cx, cy + 28)
 
   ctx.font      = 'bold 14px Segoe UI'
@@ -1330,7 +1383,7 @@ function drawLevelBanner(ctx, nextLevel) {
   if (nextLevel === 4) hints.push('MOVING bricks slide sideways!')
   if (nextLevel === 5) hints.push('STEEL bricks are indestructible!')
   if (hints.length) {
-    ctx.font = '12px Segoe UI'; ctx.fillStyle = '#4cc9f0'
+    ctx.font = '12px Segoe UI'; ctx.fillStyle = '#0096c7'
     ctx.fillText(hints[0], cx, cy + 78)
   }
   ctx.restore()

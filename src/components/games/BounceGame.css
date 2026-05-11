@@ -255,6 +255,104 @@ canvas {
   border-color: #7209b7;
 }
 
+/* ── Light-mode overrides ────────────────────────────────────────────────── */
+html:not(.dark) .canvas-wrapper {
+  box-shadow: 0 0 30px rgba(114, 9, 183, 0.2), 0 0 60px rgba(114, 9, 183, 0.08);
+}
+
+html:not(.dark) .hud {
+  background: rgba(255, 255, 255, 0.75);
+  border-color: rgba(114, 9, 183, 0.2);
+  backdrop-filter: blur(12px);
+}
+
+html:not(.dark) .hud-label {
+  color: rgba(60, 30, 100, 0.55);
+}
+
+html:not(.dark) .hud-value {
+  color: #1a0a3a;
+}
+
+html:not(.dark) .level-val {
+  color: #c25800;
+}
+
+html:not(.dark) .heart-empty {
+  color: rgba(80, 40, 120, 0.2);
+}
+
+html:not(.dark) .overlay {
+  background: rgba(240, 235, 255, 0.9);
+}
+
+html:not(.dark) .game-title {
+  background: linear-gradient(135deg, #c9184a, #7209b7, #0096c7);
+  -webkit-background-clip: text;
+  background-clip: text;
+}
+
+html:not(.dark) .game-subtitle {
+  color: rgba(30, 15, 60, 0.65);
+}
+
+html:not(.dark) .gameover-title {
+  text-shadow: 0 0 20px rgba(247, 37, 133, 0.35);
+}
+
+html:not(.dark) .final-score {
+  color: rgba(20, 10, 40, 0.8);
+}
+
+html:not(.dark) .instructions li {
+  color: rgba(30, 15, 60, 0.65);
+  background: rgba(114, 9, 183, 0.06);
+  border-color: rgba(114, 9, 183, 0.12);
+}
+
+html:not(.dark) .controls-hint {
+  color: rgba(30, 15, 60, 0.4);
+}
+
+html:not(.dark) .touch-btn {
+  background: rgba(114, 9, 183, 0.08);
+  border-color: rgba(114, 9, 183, 0.25);
+  color: #1a0a3a;
+}
+
+html:not(.dark) .touch-btn:active {
+  background: rgba(247, 37, 133, 0.18);
+  border-color: #f72585;
+}
+
+html:not(.dark) .launch-btn {
+  background: rgba(114, 9, 183, 0.15);
+  border-color: #7209b7;
+  color: #1a0a3a;
+}
+
+html:not(.dark) .leaderboard th {
+  color: rgba(30, 15, 60, 0.45);
+}
+
+html:not(.dark) .leaderboard td {
+  color: rgba(20, 10, 40, 0.8);
+}
+
+html:not(.dark) .leaderboard tr.highlight td {
+  color: #c9184a;
+}
+
+html:not(.dark) .final-level {
+  color: rgba(20, 10, 40, 0.5);
+}
+
+html:not(.dark) .initials-input {
+  background: rgba(114, 9, 183, 0.06);
+  border-color: rgba(114, 9, 183, 0.3);
+  color: #1a0a3a;
+}
+
 /* ── Initials input ───────────────────────────────────────────────────────── */
 .initials-input {
   width: 100px;
