@@ -208,20 +208,22 @@ canvas {
 /* ── Touch controls ──────────────────────────────────────────────────────── */
 .touch-controls {
   display: flex;
-  gap: 16px;
   align-items: center;
+  justify-content: center;
   margin-top: 4px;
+  /* Launch button sits in the normal flow; left/right buttons are fixed */
+  min-height: 56px;
 }
 
 .touch-btn {
-  width: 80px;
-  height: 56px;
-  font-size: 24px;
+  width: 90px;
+  height: 72px;
+  font-size: 28px;
   font-weight: 700;
   color: #fff;
   background: rgba(255, 255, 255, 0.08);
   border: 2px solid rgba(255, 255, 255, 0.15);
-  border-radius: 10px;
+  border-radius: 14px;
   cursor: pointer;
   touch-action: none;
   user-select: none;
@@ -233,9 +235,20 @@ canvas {
   border-color: #f72585;
 }
 
+/* Pin the directional buttons to the bottom corners of the screen */
+.touch-btn-left,
+.touch-btn-right {
+  position: fixed;
+  bottom: 24px;
+  z-index: 100;
+}
+
+.touch-btn-left  { left:  16px; }
+.touch-btn-right { right: 16px; }
+
 .launch-btn {
-  width: 100px;
-  height: 56px;
+  width: 110px;
+  height: 64px;
   font-size: 14px;
   letter-spacing: 2px;
   background: rgba(114, 9, 183, 0.4);

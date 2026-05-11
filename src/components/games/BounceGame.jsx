@@ -891,8 +891,9 @@ export default function App() {
 
       {/* Touch / mouse controls */}
       <div className="touch-controls">
+        {/* Left button – fixed to bottom-left corner */}
         <button
-          className="touch-btn"
+          className="touch-btn touch-btn-left"
           onTouchStart={() => keysRef.current['ArrowLeft'] = true}
           onTouchEnd={()   => keysRef.current['ArrowLeft'] = false}
           onMouseDown={() => keysRef.current['ArrowLeft'] = true}
@@ -900,14 +901,16 @@ export default function App() {
           onMouseLeave={() => keysRef.current['ArrowLeft'] = false}
         >◀</button>
 
+        {/* LAUNCH button stays centred in normal flow */}
         {anyMagnetAttached && (
           <button className="touch-btn launch-btn" onClick={handleMagnetRelease}>
             LAUNCH
           </button>
         )}
 
+        {/* Right button – fixed to bottom-right corner */}
         <button
-          className="touch-btn"
+          className="touch-btn touch-btn-right"
           onTouchStart={() => keysRef.current['ArrowRight'] = true}
           onTouchEnd={()   => keysRef.current['ArrowRight'] = false}
           onMouseDown={() => keysRef.current['ArrowRight'] = true}
@@ -1342,7 +1345,7 @@ function drawResetOverlay(ctx, livesLeft) {
   ctx.shadowColor = '#f72585'; ctx.shadowBlur = 12
   ctx.fillText(
     `${livesLeft} ${livesLeft === 1 ? 'life' : 'lives'} remaining`,
-    GAME_WIDTH / 2, WATER_SURFACE - 20
+    GAME_WIDTH / 2, WATER_SURFACE - 60
   )
   ctx.restore()
 }
