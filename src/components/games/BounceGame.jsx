@@ -248,7 +248,7 @@ function initGameState(fromLevel = 1) {
   const { vx, vy } = safeBallAngle(speed)
   const ball = {
     x: GAME_WIDTH / 2, y: PLANK_Y - BALL_RADIUS - 20,
-    vx, vy, speed, trail: [],
+    vx, vy, speed, trail: [], stuckFrames: 0,
     magnetAttached: false, magnetAttachedAt: 0,
   }
   return {
@@ -282,7 +282,7 @@ function resetBall(state) {
   const { vx, vy } = safeBallAngle(speed)
   state.balls = [{
     x: GAME_WIDTH / 2, y: PLANK_Y - BALL_RADIUS - 20,
-    vx, vy, speed, trail: [],
+    vx, vy, speed, trail: [], stuckFrames: 0,
     magnetAttached: false, magnetAttachedAt: 0,
   }]
   state.plank.x       = (GAME_WIDTH - PLANK_WIDTH) / 2
@@ -318,7 +318,7 @@ function applyPowerup(type, state, setLives) {
       state.balls.push({
         x: state.plank.x + getPlankWidth(ap) / 2,
         y: PLANK_Y - BALL_RADIUS - 5,
-        vx, vy, speed, trail: [],
+        vx, vy, speed, trail: [], stuckFrames: 0,
         magnetAttached: false, magnetAttachedAt: 0,
       })
     }
@@ -331,7 +331,16 @@ export default function App() {
   const gameStateRef   = useRef(null)
   const animFrameRef   = useRef(null)
   const keysRef        = useRef({})
-  const canvasTouchRef = useRef(null) // canvas-drag touch: { id, x } or null
+  const canvasTouchRef = useRef(null)  // canvas-drag: current touch X (canvas px), or null
+  const prevTouchXRef  = useRef(null)  // touch X read by last game-loop frame (for delta)
+
+  // Sensitivity: stored as integer 1-10 (default 5 = 1× speed).
+  // Multiplier applied to both touch-drag delta and keyboard step: value / 5.
+  const [sensitivityVal, setSensitivityVal] = useState(
+    () => parseInt(localStorage.getItem('bounce_sensitivity') ?? '5', 10)
+  )
+  const sensitivityRef = useRef(sensitivityVal)
+  const [showOptions, setShowOptions] = useState(false)
 
   const [score,               setScore]              = useState(0)
   const [gameStatus,          setGameStatus]          = useState('idle')
@@ -362,6 +371,12 @@ export default function App() {
       SFX.magnetRelease()
       setAnyMagnetAttached(false)
     }
+  }, [])
+
+  const handleSensitivityChange = useCallback(val => {
+    sensitivityRef.current = val
+    setSensitivityVal(val)
+    localStorage.setItem('bounce_sensitivity', String(val))
   }, [])
 
   // ── Save initials after high score ────────────────────────────────────────
@@ -472,19 +487,23 @@ export default function App() {
       }
 
       // ── 4. Move plank ──────────────────────────────────────────────────────
-      const effectivePW   = getPlankWidth(state.activePowerups)
-      state.plank.prevX   = state.plank.x
+      const effectivePW = getPlankWidth(state.activePowerups)
+      state.plank.prevX = state.plank.x
+      const sens = sensitivityRef.current / 5  // 1-10 → 0.2×-2.0×; 5 = 1× default
 
-      // Canvas-drag: finger position maps directly to plank centre
+      // Canvas-drag: delta-based so sensitivity scales finger movement
       if (canvasTouchRef.current !== null) {
-        const targetX = canvasTouchRef.current - effectivePW / 2
+        const prev  = prevTouchXRef.current ?? canvasTouchRef.current
+        const delta = (canvasTouchRef.current - prev) * sens
         state.plank.x = Math.max(WALL_THICKNESS,
-          Math.min(GAME_WIDTH - WALL_THICKNESS - effectivePW, targetX))
+          Math.min(GAME_WIDTH - WALL_THICKNESS - effectivePW, state.plank.x + delta))
+        prevTouchXRef.current = canvasTouchRef.current
       } else {
+        const step = PLANK_SPEED * sens
         if (keysRef.current['ArrowLeft'])
-          state.plank.x = Math.max(WALL_THICKNESS, state.plank.x - PLANK_SPEED)
+          state.plank.x = Math.max(WALL_THICKNESS, state.plank.x - step)
         if (keysRef.current['ArrowRight'])
-          state.plank.x = Math.min(GAME_WIDTH - WALL_THICKNESS - effectivePW, state.plank.x + PLANK_SPEED)
+          state.plank.x = Math.min(GAME_WIDTH - WALL_THICKNESS - effectivePW, state.plank.x + step)
       }
       state.plank.vx = state.plank.x - state.plank.prevX
 
@@ -532,11 +551,28 @@ export default function App() {
           SFX.wallBounce(); state.shake += 1
         }
         if (ball.y - BALL_RADIUS <= WALL_THICKNESS) {
-          ball.y  = WALL_THICKNESS + BALL_RADIUS
+          ball.y  = WALL_THICKNESS + BALL_RADIUS + 1   // +1 extra clearance
           ball.vy = Math.abs(ball.vy)
           const c = clampAngle(ball.vx, ball.vy, ball.speed)
           ball.vx = c.vx; ball.vy = c.vy
           SFX.wallBounce(); state.shake += 1
+        }
+
+        // 5e-pre. Stuck-ball safety escape:
+        // If the ball lingers in the top zone for too many frames it's trapped —
+        // nudge vy downward and add a tiny random vx jitter to break the symmetry.
+        const inTopZone = ball.y < WALL_THICKNESS + BRICK_H * 4
+        if (inTopZone) {
+          ball.stuckFrames = (ball.stuckFrames || 0) + 1
+          if (ball.stuckFrames > 45) {
+            ball.vy = Math.abs(ball.vy) + ball.speed * 0.15   // force downward
+            ball.vx += (Math.random() - 0.5) * ball.speed * 0.4
+            const sc = clampAngle(ball.vx, ball.vy, ball.speed)
+            ball.vx = sc.vx; ball.vy = sc.vy
+            ball.stuckFrames = 0
+          }
+        } else {
+          ball.stuckFrames = 0
         }
 
         // 5e. Brick collision (AABB + radius, one brick per ball per frame)
@@ -547,14 +583,22 @@ export default function App() {
           const dx = ball.x - nearX, dy = ball.y - nearY
           if (dx * dx + dy * dy >= BALL_RADIUS * BALL_RADIUS) continue
 
-          // Determine bounce axis
+          // Determine bounce axis and push ball out of brick (prevents re-collision next frame)
           const oL = ball.x - (brick.x - BALL_RADIUS)
           const oR = (brick.x + brick.w + BALL_RADIUS) - ball.x
           const oT = ball.y - (brick.y - BALL_RADIUS)
           const oB = (brick.y + brick.h + BALL_RADIUS) - ball.y
           const minO = Math.min(oL, oR, oT, oB)
-          if (minO === oT || minO === oB) ball.vy = -ball.vy
-          else ball.vx = -ball.vx
+          if      (minO === oT) { ball.vy = -ball.vy; ball.y -= oT }  // came from top
+          else if (minO === oB) { ball.vy = -ball.vy; ball.y += oB }  // came from bottom
+          else if (minO === oL) { ball.vx = -ball.vx; ball.x -= oL }  // came from left
+          else                  { ball.vx = -ball.vx; ball.x += oR }  // came from right
+
+          // Re-clamp angle so high-speed bounces can't create a nearly-flat trajectory
+          const bc = clampAngle(ball.vx, ball.vy, ball.speed)
+          ball.vx = bc.vx; ball.vy = bc.vy
+          // A brick collision means the ball is moving again — reset stuck counter
+          ball.stuckFrames = 0
 
           if (brick.type === BT.STEEL) {
             // Steel bricks are indestructible — only bounce
@@ -813,7 +857,36 @@ export default function App() {
             )
           })}
         </div>
+
+        {/* Options toggle */}
+        <button
+          className="hud-options-btn"
+          onClick={() => setShowOptions(s => !s)}
+          title="Options"
+          aria-label="Options"
+        >⚙</button>
       </div>
+
+      {/* ── Options panel ── */}
+      {showOptions && (
+        <div className="options-panel">
+          <div className="options-row">
+            <span className="options-label">SENSITIVITY</span>
+            <div className="options-slider-row">
+              <span className="options-hint">SLOW</span>
+              <input
+                type="range"
+                className="options-slider"
+                min={1} max={10} step={1}
+                value={sensitivityVal}
+                onChange={e => handleSensitivityChange(parseInt(e.target.value, 10))}
+              />
+              <span className="options-hint">FAST</span>
+            </div>
+            <span className="options-value">{sensitivityVal === 5 ? '1× (default)' : `${(sensitivityVal / 5).toFixed(1)}×`}</span>
+          </div>
+        </div>
+      )}
 
       {/* Canvas + overlays */}
       <div className="canvas-wrapper">
@@ -822,26 +895,24 @@ export default function App() {
           width={GAME_WIDTH}
           height={GAME_HEIGHT}
           onTouchStart={e => {
-            // Only track a drag that starts in the lower third of the canvas (near the plank)
+            // Any touch on the canvas controls the plank (overlay intercepts its own taps)
+            e.preventDefault()
             const rect  = e.currentTarget.getBoundingClientRect()
             const scale = GAME_WIDTH / rect.width
-            const touch = e.changedTouches[0]
-            const canvasY = (touch.clientY - rect.top) * scale
-            if (canvasY >= PLANK_Y - 60) {
-              e.preventDefault()
-              canvasTouchRef.current = (touch.clientX - rect.left) * scale
-            }
+            const x = (e.changedTouches[0].clientX - rect.left) * scale
+            canvasTouchRef.current = x
+            prevTouchXRef.current  = x   // no jump on first frame
           }}
           onTouchMove={e => {
             if (canvasTouchRef.current === null) return
             e.preventDefault()
             const rect  = e.currentTarget.getBoundingClientRect()
             const scale = GAME_WIDTH / rect.width
-            const touch = e.changedTouches[0]
-            canvasTouchRef.current = (touch.clientX - rect.left) * scale
+            canvasTouchRef.current = (e.changedTouches[0].clientX - rect.left) * scale
           }}
           onTouchEnd={e => {
             canvasTouchRef.current = null
+            prevTouchXRef.current  = null
           }}
           style={{ touchAction: 'none' }}
         />
@@ -852,14 +923,15 @@ export default function App() {
             <h1 className="game-title">BOUNCE</h1>
             <p className="game-subtitle">Break bricks. Survive.</p>
             <ul className="instructions">
-              <li>← → Arrow keys to move the plank</li>
+              <li>Drag anywhere on the game to move the plank</li>
+              <li>Use ◀ ▶ buttons or ← → arrow keys</li>
               <li>Moving plank curves the ball</li>
               <li>Catch power-ups with your plank</li>
               <li>Break all bricks to reach the next level</li>
               <li>Ball speeds up every level — you have {MAX_LIVES} lives</li>
             </ul>
             <button className="btn-start" onClick={startGame}>START GAME</button>
-            <p className="controls-hint">← → move • SPACE release magnet</p>
+            <p className="controls-hint">drag • ◀ ▶ buttons • SPACE/LAUNCH to release magnet</p>
           </div>
         )}
 
@@ -882,15 +954,27 @@ export default function App() {
                   className="initials-input"
                   autoFocus
                   placeholder="AAA"
+                  inputMode="text"
+                  autoCapitalize="characters"
+                  autoComplete="off"
                 />
-                <button
-                  className="btn-start"
-                  onClick={handleSaveInitials}
-                  disabled={initials.length === 0}
-                  style={{ padding: '10px 32px', fontSize: 14 }}
-                >
-                  SAVE
-                </button>
+                <div style={{ display: 'flex', gap: 10 }}>
+                  <button
+                    className="btn-start"
+                    onClick={handleSaveInitials}
+                    disabled={initials.length === 0}
+                    style={{ padding: '10px 32px', fontSize: 14 }}
+                  >
+                    SAVE
+                  </button>
+                  <button
+                    className="btn-start"
+                    onClick={() => setEnteringInitials(false)}
+                    style={{ padding: '10px 20px', fontSize: 14, background: 'rgba(255,255,255,0.1)', boxShadow: 'none' }}
+                  >
+                    SKIP
+                  </button>
+                </div>
               </div>
             ) : (
               <button className="btn-start" onClick={startGame}>PLAY AGAIN</button>
