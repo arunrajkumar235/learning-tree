@@ -841,31 +841,33 @@ export default function App() {
           <span className="hud-value level-val">{ballSpeed.toFixed(1)}</span>
         </div>
 
-        {/* Active power-up badges */}
-        <div className="active-powerups">
-          {Object.entries(activePowersDisplay).map(([type, val]) => {
-            if (!val) return null
-            if (typeof val === 'number' && val < Date.now()) return null
-            return (
-              <span
-                key={type}
-                className="powerup-badge"
-                style={{ background: POWERUP_COLORS[type] }}
-              >
-                {POWERUP_LABELS[type]}
-              </span>
-            )
-          })}
-        </div>
+        {/* Active power-up badges + options toggle — grouped so they never split across lines */}
+        <div className="hud-end-group">
+          <div className="active-powerups">
+            {Object.entries(activePowersDisplay).map(([type, val]) => {
+              if (!val) return null
+              if (typeof val === 'number' && val < Date.now()) return null
+              return (
+                <span
+                  key={type}
+                  className="powerup-badge"
+                  style={{ background: POWERUP_COLORS[type] }}
+                >
+                  {POWERUP_LABELS[type]}
+                </span>
+              )
+            })}
+          </div>
 
-        {/* Options toggle */}
-        <button
-          className="hud-options-btn"
-          onClick={() => setShowOptions(s => !s)}
-          title="Options"
-          aria-label="Options"
-        >⚙</button>
-      </div>
+          {/* Options toggle */}
+          <button
+            className="hud-options-btn"
+            onClick={() => setShowOptions(s => !s)}
+            title="Options"
+            aria-label="Options"
+          >⚙</button>
+        </div>{/* end hud-end-group */}
+      </div>{/* end hud */}
 
       {/* ── Options panel ── */}
       {showOptions && (

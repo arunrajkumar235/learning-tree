@@ -592,12 +592,22 @@ html:not(.dark) .options-slider::-moz-range-thumb {
 }
 
 /* ── Active power-ups in HUD ──────────────────────────────────────────────── */
+.hud-end-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;          /* absorbs spare space so gear stays right-aligned */
+  flex-wrap: nowrap; /* never let the gear drop to a new line */
+  min-width: 0;
+}
+
 .active-powerups {
   display: flex;
   gap: 6px;
   align-items: center;
   min-height: 24px;
   flex: 1;
+  min-width: 0;
 }
 
 .powerup-badge {
