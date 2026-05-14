@@ -62,10 +62,18 @@ const MEDIUM_COPRIME_PAIRS = [
   [3, 7], [4, 5], [5, 7], [3, 8], [5, 8], [7, 9], [5, 6],
   [4, 7], [5, 9], [7, 11],
 ];
+const HARD_COPRIME_PAIRS = [
+  [7, 11], [9, 13], [11, 13], [7, 12], [8, 13], [9, 14],
+  [11, 14], [7, 15], [8, 15], [13, 17],
+];
 
 function generateSimplifyRatio(difficulty: Difficulty): { question: string; answer: number } {
-  const pairs = difficulty === 'easy' ? EASY_COPRIME_PAIRS : MEDIUM_COPRIME_PAIRS;
-  const kRange = difficulty === 'easy' ? [2, 3, 4] : [3, 4, 5, 6, 7];
+  const pairs = difficulty === 'easy' ? EASY_COPRIME_PAIRS
+    : difficulty === 'medium' ? MEDIUM_COPRIME_PAIRS
+    : HARD_COPRIME_PAIRS;
+  const kRange = difficulty === 'easy' ? [2, 3, 4]
+    : difficulty === 'medium' ? [3, 4, 5, 6, 7]
+    : [12, 14, 15, 16, 18, 20, 24, 25];
   const [p, q] = pickFrom(pairs);
   const k = pickFrom(kRange);
   return {
@@ -79,8 +87,12 @@ function generateSimplifyRatio(difficulty: Difficulty): { question: string; answ
 // Answer = a×k
 // ---------------------------------------------------------------------------
 function generateEquivalentRatio(difficulty: Difficulty): { question: string; answer: number } {
-  const pairs = difficulty === 'easy' ? EASY_COPRIME_PAIRS : MEDIUM_COPRIME_PAIRS;
-  const kRange = difficulty === 'easy' ? [2, 3, 4] : [3, 4, 5, 6, 8];
+  const pairs = difficulty === 'easy' ? EASY_COPRIME_PAIRS
+    : difficulty === 'medium' ? MEDIUM_COPRIME_PAIRS
+    : HARD_COPRIME_PAIRS;
+  const kRange = difficulty === 'easy' ? [2, 3, 4]
+    : difficulty === 'medium' ? [3, 4, 5, 6, 8]
+    : [12, 14, 15, 16, 18, 20, 24, 25];
   const [a, b] = pickFrom(pairs);
   const k = pickFrom(kRange);
   return {
@@ -94,8 +106,8 @@ function generateEquivalentRatio(difficulty: Difficulty): { question: string; an
 // Answer = a × c / b  (always integer by construction)
 // ---------------------------------------------------------------------------
 function generateMissingTerm(difficulty: Difficulty): { question: string; answer: number } {
-  const pairs = difficulty === 'medium' ? EASY_COPRIME_PAIRS : MEDIUM_COPRIME_PAIRS;
-  const kRange = difficulty === 'medium' ? [3, 4, 5, 6] : [5, 6, 7, 8, 9, 10];
+  const pairs = difficulty === 'medium' ? EASY_COPRIME_PAIRS : HARD_COPRIME_PAIRS;
+  const kRange = difficulty === 'medium' ? [3, 4, 5, 6] : [15, 16, 18, 20, 24, 25, 30];
   const [a, b] = pickFrom(pairs);
   const k = pickFrom(kRange);
   const c = b * k; // c is a multiple of b so answer is integer
@@ -113,12 +125,12 @@ const SHARE_PAIRS_MEDIUM = [
   [1, 2], [2, 3], [1, 3], [3, 4], [1, 4], [2, 5], [3, 5],
 ];
 const SHARE_PAIRS_HARD = [
-  [3, 7], [4, 5], [5, 7], [3, 8], [5, 8], [7, 9], [4, 9],
+  [5, 8], [7, 11], [6, 13], [8, 13], [9, 14], [7, 15], [11, 14],
 ];
 
 function generateShareQuantity(difficulty: Difficulty): { question: string; answer: number } {
   const pairs   = difficulty === 'medium' ? SHARE_PAIRS_MEDIUM : SHARE_PAIRS_HARD;
-  const kRange  = difficulty === 'medium' ? [4, 5, 6, 7, 8, 10] : [6, 7, 8, 9, 10, 12, 15];
+  const kRange  = difficulty === 'medium' ? [4, 5, 6, 7, 8, 10] : [18, 20, 24, 25, 28, 30];
   const [p, q]  = pickFrom(pairs);
   const k       = pickFrom(kRange);
   const total   = (p + q) * k;
@@ -137,9 +149,9 @@ function generateShareQuantity(difficulty: Difficulty): { question: string; answ
 // ---------------------------------------------------------------------------
 function generateFourthProportional(): { question: string; answer: number } {
   // Pick a, multiplier m so b = a × m (guarantees integer result)
-  const aValues = [2, 3, 4, 5, 6, 8, 9, 10];
-  const mRange  = [2, 3, 4, 5];
-  const cRange  = [3, 4, 5, 6, 7, 8, 9, 10, 12, 15];
+  const aValues = [12, 14, 15, 16, 18, 20, 21, 24];
+  const mRange  = [3, 4, 5, 6];
+  const cRange  = [25, 28, 30, 32, 35, 36, 40, 42, 45, 48];
   const a = pickFrom(aValues);
   const m = pickFrom(mRange);
   const b = a * m;              // b is a multiple of a
@@ -171,7 +183,7 @@ const WORD_PROBLEM_TEMPLATES: Array<() => { question: string; answer: number }> 
   // --- Proportion story: travel time ---
   () => {
     const [p, q] = pickFrom(PROP_STORY_PAIRS);
-    const k = rand(6, 16); const m = rand(8, 24);
+    const k = rand(20, 50); const m = rand(25, 60);
     const [nameA, nameB] = pickFrom(PERSON_NAMES);
     const destinations = [
       ['school', 'the park'], ['the market', 'the mall'],
@@ -187,7 +199,7 @@ const WORD_PROBLEM_TEMPLATES: Array<() => { question: string; answer: number }> 
   // --- Proportion story: pages read ---
   () => {
     const [p, q] = pickFrom(PROP_STORY_PAIRS);
-    const k = rand(5, 14); const m = rand(8, 22);
+    const k = rand(20, 50); const m = rand(25, 60);
     const [nameA, nameB] = pickFrom(PERSON_NAMES);
     const A1 = p * k, B1 = q * k, A2 = p * m;
     return {
@@ -198,7 +210,7 @@ const WORD_PROBLEM_TEMPLATES: Array<() => { question: string; answer: number }> 
   // --- Proportion story: money earned ---
   () => {
     const [p, q] = pickFrom(PROP_STORY_PAIRS);
-    const k = rand(6, 16); const m = rand(7, 20);
+    const k = rand(20, 50); const m = rand(25, 60);
     const [nameA, nameB] = pickFrom(PERSON_NAMES);
     const A1 = p * k, B1 = q * k, A2 = p * m;
     return {
@@ -209,7 +221,7 @@ const WORD_PROBLEM_TEMPLATES: Array<() => { question: string; answer: number }> 
   // --- Proportion story: distance walked / cycled ---
   () => {
     const [p, q] = pickFrom(PROP_STORY_PAIRS);
-    const k = rand(5, 14); const m = rand(8, 22);
+    const k = rand(20, 50); const m = rand(25, 60);
     const [nameA, nameB] = pickFrom(PERSON_NAMES);
     const mode = pickFrom(['walks', 'cycles', 'runs']);
     const A1 = p * k, B1 = q * k, A2 = p * m;
@@ -221,7 +233,7 @@ const WORD_PROBLEM_TEMPLATES: Array<() => { question: string; answer: number }> 
   // --- Proportion story: litres filled by taps ---
   () => {
     const [p, q] = pickFrom(PROP_STORY_PAIRS);
-    const k = rand(6, 15); const m = rand(8, 22);
+    const k = rand(20, 50); const m = rand(25, 60);
     const A1 = p * k, B1 = q * k, A2 = p * m;
     return {
       question: `Tap A fills ${A1} litres per hour. Tap B fills ${B1} litres per hour. If Tap A fills ${A2} litres in a session, how many litres does Tap B fill in the same time?`,
@@ -231,7 +243,7 @@ const WORD_PROBLEM_TEMPLATES: Array<() => { question: string; answer: number }> 
   // --- Proportion story: bricks laid by workers ---
   () => {
     const [p, q] = pickFrom(PROP_STORY_PAIRS);
-    const k = rand(5, 14); const m = rand(8, 20);
+    const k = rand(20, 50); const m = rand(25, 60);
     const [nameA, nameB] = pickFrom(PERSON_NAMES);
     const A1 = p * k, B1 = q * k, A2 = p * m;
     return {
@@ -243,7 +255,7 @@ const WORD_PROBLEM_TEMPLATES: Array<() => { question: string; answer: number }> 
   () => {
     const pairs: [number, number][] = [[2, 3], [3, 4], [3, 5], [4, 5], [5, 7]];
     const [p, q] = pickFrom(pairs);
-    const k = rand(4, 12);
+    const k = rand(18, 40);
     const total = (p + q) * k;
     return {
       question: `A class of ${total} students has boys to girls in ratio ${p} : ${q}.  Girls = ?`,
@@ -254,7 +266,7 @@ const WORD_PROBLEM_TEMPLATES: Array<() => { question: string; answer: number }> 
   () => {
     const pairs: [number, number][] = [[2, 3], [3, 5], [1, 4], [4, 5], [3, 7]];
     const [p, q] = pickFrom(pairs);
-    const k = rand(8, 20);
+    const k = rand(25, 50);
     const total = (p + q) * k;
     const larger = Math.max(p, q) * k;
     const [nameA, nameB] = pickFrom(PERSON_NAMES);
